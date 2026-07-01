@@ -1,0 +1,38 @@
+stages:
+  - build
+
+variables:
+  IMAGE_TAG_SHA: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  IMAGE_TAG_LATEST: "$CI_REGISTRY_IMAGE:latest"
+
+build-image:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug
+    entrypoint: [""]
+  rules:
+    # Only build on the default branch and on tags - avoids pushing an image
+    # on every feature branch push. Adjust if you want per-branch images.
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - |
+      cat > /kaniko/.docker/config.json <<EOF
+      {
+        "auths": {
+          "$CI_REGISTRY": {
+            "auth": "$(printf "%s:%s" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD" | base64 | tr -d '\n')"
+          }
+        }
+      }
+      EOF
+  script:
+    - >
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${IMAGE_TAG_SHA}"
+      --destination "${IMAGE_TAG_LATEST}"
+      --cache=true
+      --cache-ttl=168h
