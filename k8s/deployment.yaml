@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oddsjunction
+  namespace: oddsjunction
+  labels:
+    app: oddsjunction
+spec:
+  # No longer locked to 1 by a storage constraint - Postgres via CNPG
+  # handles concurrent connections fine. Kept at 1 for now since nothing
+  # about this app's traffic needs more; bump if you want to practice
+  # horizontal scaling specifically.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oddsjunction
+  template:
+    metadata:
+      labels:
+        app: oddsjunction
+    spec:
+      containers:
+        - name: oddsjunction
+          image: REGISTRY_IMAGE_PLACEHOLDER  # e.g. gitlab-registry.gitlab.svc.cluster.local:5000/yourgroup/oddsjunction:abc1234
+          # After CI builds a new image (tagged by commit short SHA), update this
+          # line AND the matching image: line in k8s/cronjob.yaml to the same
+          # tag, then commit/push. ArgoCD's selfHeal picks up the change and
+          # redeploys/reschedules automatically - no manual kubectl needed.
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            # CNPG's auto-generated 'oddsjunction-pg-app' secret (created by
+            # k8s/cnpg-cluster.yaml) includes a ready-to-use 'uri' key -
+            # this becomes DATABASE_URL, which db.js reads directly.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: oddsjunction-pg-app
+                  key: uri
+          envFrom:
+            - secretRef:
+                name: oddsjunction-secrets   # ODDS_API_KEY, Betfair creds - see k8s/secret.example.yaml
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /api/cache-bust
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/cache-bust
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20

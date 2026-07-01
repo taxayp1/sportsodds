@@ -1,0 +1,25 @@
+# Adjust ingressClassName and host to match your homelab ingress controller and DNS.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oddsjunction
+  namespace: oddsjunction
+  annotations:
+    # cert-manager.io/cluster-issuer: letsencrypt-prod   # uncomment if using cert-manager
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: oddsjunction.home.lab   # CHANGE ME
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: oddsjunction
+                port:
+                  number: 80
+  # tls:
+  #   - hosts:
+  #       - oddsjunction.home.lab
+  #     secretName: oddsjunction-tls

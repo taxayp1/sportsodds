@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>OddsJunction</title>
+<!-- canonical (prefer https + your chosen host) -->
+<link rel="canonical" href="https://www.oddsjunction.com.au/">
+<!-- favicons -->
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="shortcut icon" type="image/png" href="/favicon.png">
+<meta name="description" content="OddsJunction compares odds from major Australian bookmakers for Cricket, AFL, NRL, Tennis and UFC. Find the best prices, and stay updated.">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Kanit:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="mobile-scroll-wrapper">
+<header>
+<div class="hamburger-wrapper">
+<button class="hamburger">☰</button>
+</div>
+<h1 class="brand-logo">
+  <span class="brand-odds">Odds</span><span class="brand-junction">junction</span>
+</h1>
+<nav class="sport-nav">
+  <button class="sport-tab" onclick="selectTab('cricket')">
+    <div class="sport-icon">
+      <img src="cricket-icon.png" alt="Cricket" />
+    </div>
+    <span class="sport-label">Cricket</span>
+  </button>
+  
+  <button class="sport-tab" onclick="selectTab('aussierules_afl')">
+    <div class="sport-icon">
+      <img src="afl-icon.png" alt="AFL" />
+    </div>
+    <span class="sport-label">AFL</span>
+  </button>
+  
+  <button class="sport-tab" onclick="selectTab('rugbyleague_nrl')">
+    <div class="sport-icon">
+      <img src="nrl-icon.png" alt="NRL" />
+    </div>
+    <span class="sport-label">NRL</span>
+  </button>
+  
+  <button class="sport-tab" onclick="selectTab('ufc')">
+    <div class="sport-icon">
+      <img src="ufc-icon.png" alt="UFC" />
+    </div>
+    <span class="sport-label">UFC</span>
+  </button>
+
+  <button class="sport-tab" onclick="selectTab('tennis')">
+  <div class="sport-icon">
+    <img src="tennis-icon.png" alt="Tennis" />
+  </div>
+  <span class="sport-label">Tennis</span>
+</button>
+  
+  <button class="sport-tab" onclick="selectTab('exchange')">
+    <div class="sport-icon">
+      <img src="exchange-icon.png" alt="Exchange" />
+    </div>
+    <span class="sport-label">Exchange</span>
+  </button>
+</nav>
+<div class="dropdown-menu" id="dropdown">
+<div class="dropdown-extra">
+<strong>📰 News</strong>
+<p>Latest betting news and insights - Coming up soon</p>
+</div>
+<hr/>
+<div class="dropdown-extra">
+<strong>💡 Tips</strong>
+<p>Expert picks and value bets - Coming up soon</p>
+</div>
+<hr/>
+<div class="dropdown-extra">
+<strong>📖 README</strong>
+<p><a href="readme.html" target="_blank">View project documentation</a></p>
+</div>
+</div></header>
+<div class="filter-bar">
+<input id="searchInput" placeholder="Search matches..." type="text"/>
+<select id="bookmakerFilter">
+<option value="">Bookmakers</option>
+</select>
+</div>
+<main id="odds-container"></main>
+</div>
+
+<section class="rg-banner">
+  <strong>WHAT'S GAMBLING REALLY COSTING YOU?</strong><br>
+  For free and confidential support call <a href="tel:1800858858">1800 858 858</a>
+  or visit <a href="https://www.gamblinghelponline.org.au/" target="_blank">gamblinghelponline.org.au</a>
+  <img src="18plus.png" alt="18+" class="rg-18">
+</section>
+
+<!-- Keep the detailed disclaimer collapsible -->
+<section class="terms-section collapsible">
+  <details>
+    <summary><strong>Disclaimer &amp; Terms</strong></summary>
+    <p>OddsJunction displays sports betting odds for informational purposes only. We are not a betting operator and do not accept wagers.</p>
+    <p>Odds are retrieved from licensed Australian bookmakers. Please verify odds with the respective bookmaker before placing any bet.</p>
+    <p>We do not process payments or bets. Always gamble responsibly.</p>
+    <p>Contact: <a href="mailto:taxayp1@gmail.com">taxayp1@gmail.com</a></p>
+  </details>
+</section>
+<script src="script.js"></script>
+</body>
+</html>

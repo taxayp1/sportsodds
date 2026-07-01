@@ -1,0 +1,48 @@
+# Single PostgreSQL instance is intentional here - this app does ~14 writes/day
+# (2 cron runs x 7 sport keys, each inserting a handful of rows) plus light
+# read traffic from the web UI. No HA need at this scale. To practice CNPG's
+# HA story later (streaming replication, automatic failover), bump
+# `instances: 3` - CNPG handles promoting a new primary automatically, no
+# other changes needed here.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: oddsjunction-pg
+  namespace: oddsjunction
+spec:
+  instances: 1
+
+  storage:
+    size: 2Gi
+    storageClass: longhorn   # adjust if your Longhorn StorageClass has a different name
+
+  # Wires this cluster's metrics into kube-prometheus-stack automatically,
+  # since CNPG ships a PodMonitor-compatible metrics endpoint.
+  monitoring:
+    enablePodMonitor: true
+
+  bootstrap:
+    initdb:
+      database: oddsjunction
+      owner: oddsjunction_app
+      # CNPG auto-generates a Secret named 'oddsjunction-pg-app' (cluster
+      # name + '-app' suffix) containing: username, password, host, port,
+      # dbname, uri, and pgpass. k8s/deployment.yaml and k8s/cronjob.yaml
+      # reference this secret's 'uri' key directly as DATABASE_URL - no
+      # manual credential wiring needed, the operator handles it.
+
+  postgresql:
+    parameters:
+      # Defaults are fine at this scale; kept explicit so it's obvious
+      # where to tune if this ever needs to handle more than a hobby's
+      # worth of traffic.
+      max_connections: "50"
+      shared_buffers: "128MB"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

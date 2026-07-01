@@ -1,0 +1,34 @@
+{
+  "name": "oddsjunction",
+  "version": "1.0.0",
+  "description": "Odds Junction - Compare Australian sports odds across top AU bookmakers.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "cron": "node cronFetch.js"
+  },
+  "keywords": [
+    "odds",
+    "sports",
+    "australia",
+    "betting",
+    "bookmakers",
+    "comparison"
+  ],
+  "author": "OddsJunction Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,948 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  color: #222;
+  scroll-behavior: smooth;
+}
+
+/* ——————————————— */
+/*  Header & Logo Style */
+/* ——————————————— */
+header {
+  background: #003366;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  position: relative;
+}
+
+/* Compact serif logo style */
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  margin: 0;
+  color: #fff;
+}
+
+/* HAMBURGER MENU STYLES - FIXED POSITION */
+.hamburger-wrapper {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 1001;
+}
+
+.hamburger {
+  background: transparent;
+  color: white;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: block;
+}
+
+.hamburger:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown styles - IMPROVED CENTERING VERSION */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 4rem;
+  left: 1rem;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 260px;
+  max-width: 280px;
+  font-size: 0.9rem;
+}
+
+.dropdown-menu hr {
+  margin: 0.8rem 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+.dropdown-extra {
+  padding: 0.3rem 0.4rem;
+  text-align: center; /* Center align all content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.dropdown-extra strong {
+  display: block;
+  color: #003366;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.dropdown-extra p {
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+  font-size: 0.78rem;
+  text-align: center;
+  max-width: 220px; /* Prevent text from being too wide */
+}
+
+.dropdown-extra a {
+  color: #003366;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: center;
+  display: inline-block;
+}
+
+.dropdown-extra a:hover {
+  text-decoration: underline;
+  color: #0055aa;
+}
+
+nav button {
+  background: white;
+  color: #003366;
+  border: none;
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* UPDATED: 3-Column Responsive Grid Layout */
+#odds-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.match-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow: visible;
+  position: relative;
+  min-width: 350px;
+  margin-bottom: 0; /* Remove margin since we're using grid gap */
+}
+
+.match-card h3 {
+  margin-top: 0;
+  font-size: 1.1em;
+  line-height: 1.3;
+}
+
+/* Live indicator in corner */
+.live-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff4444;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+  z-index: 2;
+}
+
+/* Live match styling */
+.match-card.live-match {
+  border: 2px solid #ff4444;
+  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+.match-card.upcoming-match {
+  border: 2px solid #ff9800;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+  background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+}
+
+/* Status text styling */
+.start-time.live-match {
+  color: #ff4444;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.start-time.upcoming-match {
+  color: #ff9800;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+/* Pulse animation for live matches */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  position: relative;
+  z-index: 1;
+  font-size: 0.9em;
+}
+
+th, td {
+  text-align: center;
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+
+th:first-child,
+td:first-child {
+  text-align: center;
+  width: 60px;
+}
+
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.8em;
+}
+
+/* UPDATED: Slightly bigger logos */
+.logo {
+  width: 55px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.highlight {
+  font-weight: bold;
+  color: green;
+  background: #d4edda;
+  color: #155724;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 10px;
+}
+
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Last-updated timestamp in header */
+.last-updated-header {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* Search and Filter Bar */
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
+}
+
+#searchInput {
+  flex: 1;
+  max-width: 300px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#bookmakerFilter {
+  margin-left: auto;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.sparkline {
+  width: 80px;
+  height: 30px;
+  position: relative;
+  z-index: 10;
+}
+
+.start-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.6rem;
+}
+
+.match-card table {
+  margin-top: 0.5rem;
+}
+
+th:first-child, td:first-child {
+  padding-left: 0.3rem;
+}
+
+/* Ensure sparkline charts align properly */
+td canvas.sparkline {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Optional: force consistent row height */
+.match-card table tr {
+  height: 50px;
+}
+
+.bet-btn {
+  background-color: #003366;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.bet-btn:hover {
+  background-color: #0055aa;
+}
+
+/* T&C Section Style */
+.terms-section {
+  background-color: #04366b;
+  color: white;
+  text-align: center;
+  padding: 25px 20px;
+  font-size: 0.78rem;
+}
+
+.terms-section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.terms-section p {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  margin: 0.3rem auto;
+}
+
+.terms-section a {
+  color: #ffdd57;
+}
+
+/* Sport tag styling */
+.sport-tag {
+  display: inline-block;
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* Changed color animation */
+.match-card td.changed {
+  background: #fff3cd;
+  animation: highlight-fade 3s ease-out;
+}
+
+@keyframes highlight-fade {
+  0% { background: #ffeaa7; }
+  100% { background: #fff3cd; }
+}
+
+/* Desktop - 3 columns */
+@media (min-width: 1201px) {
+  #odds-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet - 2 columns */
+@media (min-width: 769px) and (max-width: 1200px) {
+  #odds-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  #searchInput, #bookmakerFilter {
+    width: 100%;
+    max-width: none;
+  
+  .brand-junction { font-family: "Kanit", sans-serif; font-weight: 800; font-style: italic; }
+}
+}
+
+@media (max-width: 768px) {
+  .match-card { min-width: 0 !important; }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+
+  .hamburger-wrapper {
+    left: 0.5rem;
+    top: 0.5rem;
+  }
+  
+  .hamburger {
+    font-size: 28px;
+    padding: 10px;
+  }
+  
+  .dropdown-menu {
+    left: 0.5rem;
+    right: 0.5rem;
+    min-width: auto;
+    max-width: none;
+    width: calc(100vw - 2rem);
+    box-sizing: border-box;
+    top: 3.5rem;
+    font-size: 0.78rem;
+  }
+  
+  .dropdown-extra strong {
+    font-size: 0.9rem;
+  }
+  
+  .dropdown-extra p {
+    font-size: 0.8rem;
+  }
+
+  .last-updated-header {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    font-size: 0.8rem;
+    color: white;
+    margin: 0;
+    z-index: 10;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  nav button {
+    padding: 0.3rem 0.7rem !important;
+    font-size: 0.85rem !important;
+    font-weight: bold;
+    border-radius: 6px;
+    min-width: 90px;
+    max-width: 110px;
+    margin: 0.2rem;
+    text-align: center;
+    white-space: nowrap;
+    width: auto !important;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    width: 90%;
+    max-width: 400px;
+    font-size: 1rem;
+  }
+
+  /* UPDATED: Mobile gets single column with horizontal scroll for tables */
+  #odds-container {
+    padding: 0.8rem;
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 15px;
+  }
+
+  .match-card {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0;
+    padding: 1rem;
+    font-size: 1rem;
+    min-width: unset;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .match-card h3 {
+    font-size: 1rem;
+  }
+
+  .match-card table { width: 100%; table-layout: auto; font-size: 0.85em; border-collapse: collapse; }
+
+  th, td {
+    font-size: 0.85rem;
+    padding: 6px 4px;
+    white-space: nowrap;
+  }
+
+  /* UPDATED: Smaller logos on mobile */
+  .logo {
+    width: 45px;
+    height: 32px;
+  }
+
+  header, .terms-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    text-align: center;
+  }
+
+  .terms-section {
+    font-size: 0.9rem;
+    background: #04366b;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-radius: 0;
+  }
+
+  .terms-section h2, .terms-section p {
+    margin: 0.3rem 0;
+    word-break: break-word;
+    text-align: center;
+  }
+
+  .live-indicator {
+    top: 6px;
+    right: 6px;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .match-card.live-match,
+  .match-card.upcoming-match {
+    border-width: 1px;
+  }
+  
+  .start-time.live-match,
+  .start-time.upcoming-match {
+    font-size: 0.9rem;
+  }
+}
+
+.match-card {
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+}
+
+.chartjs-tooltip {
+  font-size: 10px;
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 3px;
+  position: absolute;
+  z-index: 1000;
+  white-space: nowrap;
+  pointer-events: none;
+  clip: auto !important;
+  max-width: 100px;
+}
+
+.chartjs-tooltip {
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  transform: translate(-50%, -120%);
+  pointer-events: none;
+  position: absolute;
+  z-index: 1000;
+}
+
+.match-card {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.match-card::-webkit-scrollbar {
+  height: 6px;
+}
+
+.match-card::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+/* Mobile scroll improvements */
+@media (max-width: 768px) {
+  .match-card { min-width: 0 !important; }
+  .match-card table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .match-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+th, td { overflow: hidden; text-overflow: ellipsis; }
+/* your existing CSS remains above this line */
+
+@media (max-width: 768px) {
+  .match-card table {
+    display: table !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    white-space: normal !important;
+  }
+
+  .match-card th,
+  .match-card td {
+    white-space: normal !important;
+    word-break: break-word;
+    padding: 6px 4px;
+  }
+}
+.brand-logo { font-family: "Montserrat", sans-serif; font-weight: 900; font-size: 1.8rem; margin: 0; letter-spacing: 1px; }
+
+.brand-odds { color: #ffcc00; margin-right: 0; font-family: "Montserrat", sans-serif; font-weight: 900; }
+
+.brand-junction {  color: #ffffff;  font-family: "Kanit", sans-serif;  font-weight: 800;  font-style: italic;  letter-spacing: 0.5px;  transform: translateY(0.5px);}
+/* Mobile fix for logo + updated time overlap */
+/* --- Mobile fix: prevent logo + updated time overlap --- */
+@media (max-width: 600px) {
+  /* keep header simple + stacked on phones */
+  header { 
+    padding: 10px 12px 12px;
+    text-align: center;
+  }
+
+  /* slightly smaller brand on mobile */
+  .brand-logo { font-family: "Montserrat", sans-serif; font-weight: 900; font-size: 1.8rem; margin: 0; letter-spacing: 1px; }
+
+  /* move the timestamp into normal flow, center it, and shrink */
+  .last-updated-header {
+    position: static !important;   /* was absolute */
+    display: block;
+    margin: 4px auto 0;
+    font-size: 0.85rem;
+    color: #fff;
+  }
+
+  /* give the buttons a little space below the logo/time */
+  nav { 
+    margin-top: 8px;
+  }
+
+  /* keep hamburger where it is */
+  .hamburger-wrapper {
+    left: 8px;
+    top: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .brand-logo { font-family: "Montserrat", sans-serif; font-weight: 900; font-size: 1.8rem; margin: 0; letter-spacing: 1px; }
+
+  .brand-odds { color: #ffcc00; margin-right: 0; font-family: "Montserrat", sans-serif; font-weight: 900; }
+
+  .brand-junction {  color: #ffffff;  font-family: "Kanit", sans-serif;  font-weight: 800;  font-style: italic;  letter-spacing: 0.5px;  transform: translateY(0.5px);}
+}
+/* Exchange odds coloring */
+.back-odds {
+  background-color: #d4e9f9; /* light sky blue */
+  font-weight: bold;
+}
+
+.lay-odds {
+  background-color: #f9d4d4; /* light red */
+  font-weight: bold;
+}
+/* Exchange odds: price + available amount (keeps your blue/red backgrounds) */
+.ex-price { font-weight: 700; line-height: 1.05; }
+.ex-size  { font-size: 0.75em; opacity: 0.85; margin-top: 2px; }
+
+/* already added earlier
+.back-odds { background-color:#d4e9f9; font-weight:bold; }
+.lay-odds  { background-color:#f9d4d4; font-weight:bold; }
+*/
+.ex-matched{
+  font-size: 0.78em;
+  color: #666;
+  margin-top: 6px;
+  text-align: right;   /* keeps layout tidy on mobile */
+}
+.ex-matched strong { color: #222; }
+/* Always-visible responsible gambling banner */
+.rg-banner{
+  background:#04366b;
+  color:#fff;
+  text-align:center;
+  padding:14px 12px;
+  font-size:.92rem;
+  line-height:1.45;
+}
+.rg-banner a{ color:#ffdd57; font-weight:600; }
+.rg-banner .rg-18{
+  width:36px; height:36px; margin-left:8px; vertical-align:middle;
+}
+@media (max-width:600px){
+  .rg-banner{ font-size:.88rem; padding:12px 10px; }
+  .rg-banner .rg-18{ width:32px; height:32px; }
+}
+/* Keep Bet column tidy, single-line */
+.match-card table th:last-child,
+.match-card table td:last-child{
+  white-space:nowrap;
+  width:72px;           /* desktop/tablet */
+}
+
+/* Button shouldn’t wrap */
+.bet-btn{ white-space:nowrap; }
+
+/* On smaller screens, give it just a touch less width and smaller text */
+@media (max-width:768px){
+  .match-card table th:last-child,
+  .match-card table td:last-child{ width:64px; }
+  .bet-btn{ font-size:.78rem; padding:6px 10px; }
+}
+
+/* Updated sport tabs with consistent sizing, round corners, and white borders */
+.sport-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  color: #003366;
+  border: 2px solid white; /* Add white border */
+  padding: 0.4rem 0.3rem;
+  border-radius: 14px; /* Slightly more rounded */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 60px; /* Slightly smaller width */
+  max-width: 60px; /* Prevent stretching */
+  height: 40px; /* Smaller height for tidier look */
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  justify-content: center; /* Center content vertically */
+}
+
+.sport-tab:hover {
+  background: #f0f8ff;
+  border: 2px solid #e6f3ff; /* Subtle border change on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Active state with prominent white border */
+.sport-tab.active {
+  background: #003366;
+  color: white;
+  border: 2px solid white; /* White border stands out against dark background */
+  box-shadow: 0 4px 12px rgba(0,51,102,0.4);
+}
+
+.sport-tab.active:hover {
+  background: #002244;
+  border: 2px solid white; /* Keep white border on hover */
+}
+
+.sport-icon {
+  width: 24px; /* Slightly larger for better visibility */
+  height: 24px;
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sport-icon img {
+  width: 20px; /* Consistent icon size */
+  height: 20px;
+  object-fit: contain;
+}
+
+.sport-label {
+  font-size: 0.48rem; /* Smaller text to fit better */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.sport-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem; /* Slightly more space between tabs */
+  margin: 0.8rem 0;
+  padding: 0;
+}
+
+/* Mobile adjustments - keep them round and consistent */
+/* Mobile adjustments - slightly bigger than current size */
+@media (max-width: 768px) {
+  .sport-tab {
+    min-width: 62px;    /* Increased from 55px to 62px */
+    max-width: 62px;    /* Increased from 55px to 62px */
+    height: 46px;       /* Increased from 42px to 46px */
+    padding: 0.35rem 0.3rem;  /* Slightly more padding */
+    border-radius: 15px; /* Slightly more rounded */
+    border: 2px solid white;
+  }
+  
+  .sport-icon {
+    width: 22px;        /* Increased from 20px to 22px */
+    height: 22px;       /* Increased from 20px to 22px */
+    margin-bottom: 0.18rem;  /* Slightly more margin */
+  }
+  
+  .sport-icon img {
+    width: 19px;        /* Increased from 18px to 19px */
+    height: 19px;       /* Increased from 18px to 19px */
+  }
+  
+  .sport-label {
+    font-size: 0.57rem; /* Increased from 0.55rem */
+  }
+  
+  .sport-nav {
+    gap: 0.45rem;       /* Slightly more spacing between tabs */
+    margin: 0.55rem 0;  /* Slightly more margin around nav */
+  }
+}
+
+/* MINIMAL SMOOTHNESS ADDITIONS - Add to bottom of your existing CSS */
+
+/* Hardware acceleration for smooth performance */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Smooth transitions for interactive elements */
+.sport-tab, .bet-btn, .hamburger, .match-card {
+  transition: all 0.3s ease;
+  transform: translate3d(0, 0, 0);
+}
+
+.sport-tab:hover {
+  transform: translateY(-2px);
+}
+
+.bet-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 51, 102, 0.2);
+}
+
+.match-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth table interactions */
+tr {
+  transition: background-color 0.2s ease;
+}
+
+/* Enhanced search inputs */
+#searchInput:focus, #bookmakerFilter:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+  outline: none;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better mobile scrolling */
+.match-card {
+  -webkit-overflow-scrolling: touch;
+}

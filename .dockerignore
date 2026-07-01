@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.env.*
+*.db
+odds.db
+.DS_Store
+k8s
+README.md
+readme.html
+.gitlab-ci.yml

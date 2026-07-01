@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OddsJunction - Project Overview</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+    }
+    h2 {
+        color: #34495e;
+        margin-top: 30px;
+    }
+    /* Diagram wrapper for scrolling */
+    .diagram-wrapper {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+        padding: 10px;
+        max-width: 100%;
+    }
+    svg {
+        height: auto;
+        min-width: 850px; /* Ensures horizontal scroll on mobile */
+    }
+</style>
+</head>
+<body>
+
+<h1>OddsJunction Project</h1>
+<p><strong>Sports Betting Odds Tracker for Australian Sports</strong></p>
+
+<h2>Overview</h2>
+<p>OddsJunction is a cloud-native application that automatically collects, processes, and displays betting odds for Australian sports including AFL, NRL, and Cricket. It uses AWS services for scalability, reliability, and automation — ensuring the latest odds are fetched every 6 minutes and made accessible via a responsive web interface.</p>
+
+<h2>Architecture & Data Flow</h2>
+<p>The diagram below shows the full architecture — from development to deployment, odds fetching, storage, and user delivery — along with monitoring.</p>
+
+<div class="diagram-wrapper">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+    <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#000" />
+        </marker>
+    </defs>
+
+    <!-- Deployment chain -->
+    <rect x="50" y="50" width="120" height="40" rx="8" fill="#3b3b3b"/>
+    <text x="110" y="75" fill="white" text-anchor="middle">VS Code</text>
+
+    <rect x="200" y="50" width="120" height="40" rx="8" fill="#e74c3c"/>
+    <text x="260" y="75" fill="white" text-anchor="middle">GitHub</text>
+
+    <rect x="350" y="50" width="140" height="40" rx="8" fill="#34495e"/>
+    <text x="420" y="75" fill="white" text-anchor="middle">CodePipeline</text>
+
+    <line x1="170" y1="70" x2="200" y2="70" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="320" y1="70" x2="350" y2="70" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="490" y1="70" x2="550" y2="150" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Elastic Beanstalk center -->
+    <rect x="500" y="150" width="160" height="50" rx="8" fill="#e67e22"/>
+    <text x="580" y="180" fill="white" text-anchor="middle">Elastic Beanstalk</text>
+
+    <!-- Odds API -->
+    <rect x="500" y="50" width="160" height="40" rx="8" fill="#2ecc71"/>
+    <text x="580" y="75" fill="white" text-anchor="middle">The Odds API</text>
+    <line x1="580" y1="90" x2="580" y2="150" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- DynamoDB -->
+    <rect x="500" y="270" width="160" height="50" rx="8" fill="#f39c12"/>
+    <text x="580" y="300" fill="white" text-anchor="middle">AWS DynamoDB</text>
+    <line x1="580" y1="200" x2="580" y2="270" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- CloudFront -->
+    <rect x="700" y="150" width="140" height="40" rx="8" fill="#9b59b6"/>
+    <text x="770" y="175" fill="white" text-anchor="middle">AWS CloudFront</text>
+    <line x1="660" y1="175" x2="700" y2="175" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Route 53 -->
+    <rect x="700" y="220" width="140" height="40" rx="8" fill="#1abc9c"/>
+    <text x="770" y="245" fill="white" text-anchor="middle">AWS Route 53</text>
+    <line x1="770" y1="190" x2="770" y2="220" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Certificate Manager -->
+    <rect x="700" y="290" width="140" height="40" rx="8" fill="#2980b9"/>
+    <text x="770" y="315" fill="white" text-anchor="middle">Cert Manager</text>
+    <line x1="770" y1="260" x2="770" y2="290" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Users -->
+    <rect x="700" y="360" width="140" height="40" rx="8" fill="#3498db"/>
+    <text x="770" y="385" fill="white" text-anchor="middle">Users</text>
+    <line x1="770" y1="330" x2="770" y2="360" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- CloudWatch -->
+    <rect x="300" y="270" width="160" height="50" rx="8" fill="#8e44ad"/>
+    <text x="380" y="300" fill="white" text-anchor="middle">AWS CloudWatch</text>
+    <line x1="460" y1="295" x2="500" y2="295" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="380" y1="270" x2="500" y2="175" stroke="black" stroke-width="1" marker-end="url(#arrow)"/>
+</svg>
+</div>
+
+<h2>Component Roles</h2>
+<ul>
+    <li><strong>VS Code:</strong> Local development environment.</li>
+    <li><strong>GitHub:</strong> Code repository & version control.</li>
+    <li><strong>CodePipeline:</strong> CI/CD for automatic deployments.</li>
+    <li><strong>Elastic Beanstalk:</strong> Hosts app, runs cron jobs, serves frontend/API.</li>
+    <li><strong>The Odds API:</strong> External API for live odds.</li>
+    <li><strong>AWS DynamoDB:</strong> Stores odds history with TTL cleanup.</li>
+    <li><strong>CloudFront:</strong> CDN for fast content delivery.</li>
+    <li><strong>Route 53:</strong> DNS routing for the domain.</li>
+    <li><strong>Certificate Manager:</strong> SSL/TLS management.</li>
+    <li><strong>Users:</strong> Visitors using the OddsJunction site.</li>
+    <li><strong>CloudWatch:</strong> Monitoring and logging.</li>
+</ul>
+
+</body>
+</html>
