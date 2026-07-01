@@ -1,10 +1,12 @@
 stages:
   - build
+  - update-manifests
 
 variables:
   IMAGE_TAG_SHA: "registry.taxayp.com/taxayp/oddsjunction:$CI_COMMIT_SHORT_SHA"
   IMAGE_TAG_LATEST: "registry.taxayp.com/taxayp/oddsjunction:latest"
   CI_REGISTRY: "registry.taxayp.com"
+  GITOPS_REPO: "gitlab.taxayp.com/taxayp/K8s-HomeLab-Gitops.git"
 
 build-image:
   stage: build
@@ -20,7 +22,7 @@ build-image:
       cat > /kaniko/.docker/config.json <<EOF
       {
         "auths": {
-          "gitlab-registry.gitlab.svc.cluster.local:5000": {
+          "registry.taxayp.com": {
             "auth": "$(printf "%s:%s" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD" | base64 | tr -d '\n')"
           }
         }
@@ -33,6 +35,32 @@ build-image:
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${IMAGE_TAG_SHA}"
       --destination "${IMAGE_TAG_LATEST}"
-      --skip-tls-verify
       --cache=true
       --cache-ttl=168h
+
+update-manifests:
+  stage: update-manifests
+  image: alpine:3.19
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  before_script:
+    - apk add --no-cache git curl
+    - git config --global user.email "ci@taxayp.com"
+    - git config --global user.name "GitLab CI"
+  script:
+    - git clone "https://gitlab-ci-token:${GITOPS_TOKEN}@${GITOPS_REPO}" gitops
+    - cd gitops
+    - |
+      sed -i "s|registry.taxayp.com/taxayp/oddsjunction:.*|registry.taxayp.com/taxayp/oddsjunction:${CI_COMMIT_SHORT_SHA}|g" \
+        apps/oddsjunction/deployment.yaml \
+        apps/oddsjunction/cronjob.yaml
+    - git add apps/oddsjunction/deployment.yaml apps/oddsjunction/cronjob.yaml
+    - |
+      if ! git diff --staged --quiet; then
+        git commit -m "ci: bump oddsjunction image to ${CI_COMMIT_SHORT_SHA}"
+        git push
+      else
+        echo "No image tag changes to commit"
+      fi
+  dependencies:
+    - build-image
