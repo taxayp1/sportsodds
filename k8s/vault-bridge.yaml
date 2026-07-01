@@ -1,0 +1,72 @@
+# oddsjunction-vault-bridge.yaml
+# Store this in your GitOps infra repo alongside your other vault bridge files.
+# Before ArgoCD syncs this, you must first create the secrets in Vault:
+#
+# vault kv put kv/oddsjunction \
+#   odds-api-key="your_rotated_key" \
+#   betfair-app-key="your_key" \
+#   betfair-username="your_email" \
+#   betfair-password="your_password"
+#
+# The SecretStore reuses your existing vault-backend pattern (same server,
+# same kubernetes auth role as gitlab) - no new Vault policy needed if
+# argocd-role already has read access to kv/* paths. If not, add a policy:
+#
+# vault policy write oddsjunction-policy - <<EOF
+# path "kv/data/oddsjunction" { capabilities = ["read"] }
+# EOF
+# vault write auth/kubernetes/role/argocd-role \
+#   bound_service_account_names=... \
+#   policies=...,oddsjunction-policy  # append, don't replace
+
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: vault-backend
+  namespace: oddsjunction
+spec:
+  provider:
+    vault:
+      server: "http://vault.vault.svc.cluster.local:8200"
+      path: "kv"
+      version: "v2"
+      auth:
+        kubernetes:
+          mountPath: "kubernetes"
+          role: "argocd-role"
+
+---
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: oddsjunction-vault-secrets
+  namespace: oddsjunction
+spec:
+  refreshInterval: "1h"
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: oddsjunction-secrets
+    creationPolicy: Owner
+  data:
+    - secretKey: ODDS_API_KEY
+      remoteRef:
+        key: oddsjunction
+        property: odds-api-key
+
+    - secretKey: BETFAIR_APP_KEY
+      remoteRef:
+        key: oddsjunction
+        property: betfair-app-key
+
+    - secretKey: BETFAIR_USERNAME
+      remoteRef:
+        key: oddsjunction
+        property: betfair-username
+
+    - secretKey: BETFAIR_PASSWORD
+      remoteRef:
+        key: oddsjunction
+        property: betfair-password

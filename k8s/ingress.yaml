@@ -5,11 +5,13 @@ metadata:
   name: oddsjunction
   namespace: oddsjunction
   annotations:
-    # cert-manager.io/cluster-issuer: letsencrypt-prod   # uncomment if using cert-manager
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   rules:
-    - host: oddsjunction.home.lab   # CHANGE ME
+    - host: oddsjunction.taxayp.com
       http:
         paths:
           - path: /
@@ -19,7 +21,7 @@ spec:
                 name: oddsjunction
                 port:
                   number: 80
-  # tls:
-  #   - hosts:
-  #       - oddsjunction.home.lab
-  #     secretName: oddsjunction-tls
+  tls:
+     - hosts:
+       - oddsjunction.home.lab
+       secretName: oddsjunction-tls

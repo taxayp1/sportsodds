@@ -1,18 +1,4 @@
-# Runs the odds fetch on a schedule, completely independent of the web
-# Deployment's lifecycle. Restarting/redeploying the web pod no longer
-# affects whether or when a fetch happens, and a fetch failure shows up
-# as a distinctly failed Job rather than buried in web server logs.
-#
-# Schedule: 00:00 and 12:00 UTC daily (2 runs/day).
-# Quota math: 7 sport keys x 2 runs/day = 14 requests/day = ~420/month,
-# safely under the-odds-api free tier's 500/month cap with headroom for
-# occasional manual `kubectl create job --from=cronjob/...` test runs.
-#
-# No PVC, no pod affinity here - that complexity existed only because
-# SQLite + a ReadWriteOnce PVC required this Job's pod to land on the same
-# node as the web Deployment's pod. Now that both talk to CloudNativePG over
-# the network, this Job's pod can be scheduled on any node, same as any
-# normal stateless workload.
+
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -35,7 +21,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: oddsjunction-fetch
-              image: REGISTRY_IMAGE_PLACEHOLDER  # must match deployment.yaml's image tag
+              image: gitlab-registry.gitlab.svc.cluster.local:5000/taxayp/oddsjunction:1987155b
               command: ["node", "cronFetch.js"]
               env:
                 - name: DATABASE_URL

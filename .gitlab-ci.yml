@@ -2,12 +2,9 @@ stages:
   - build
 
 variables:
-  IMAGE_TAG_SHA: "gitlab-registry.gitlab.svc.cluster.local:5000/taxayp/oddsjunction:$CI_COMMIT_SHORT_SHA"
-  IMAGE_TAG_LATEST: "gitlab-registry.gitlab.svc.cluster.local:5000/taxayp/oddsjunction:latest"
-  # Override the external registry URL with the in-cluster service address.
-  # The runner pod is inside the cluster and can reach the registry service
-  # directly - no ingress or external DNS needed.
-  CI_REGISTRY: "gitlab-registry.gitlab.svc.cluster.local:5000"
+  IMAGE_TAG_SHA: "registry.taxayp.com/taxayp/oddsjunction:$CI_COMMIT_SHORT_SHA"
+  IMAGE_TAG_LATEST: "registry.taxayp.com/taxayp/oddsjunction:latest"
+  CI_REGISTRY: "registry.taxayp.com"
 
 build-image:
   stage: build

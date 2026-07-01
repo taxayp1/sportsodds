@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: oddsjunction
-          image: REGISTRY_IMAGE_PLACEHOLDER  # e.g. gitlab-registry.gitlab.svc.cluster.local:5000/yourgroup/oddsjunction:abc1234
+          image: gitlab-registry.gitlab.svc.cluster.local:5000/taxayp/oddsjunction:1987155b  # e.g. gitlab-registry.gitlab.svc.cluster.local:5000/yourgroup/oddsjunction:abc1234
           # After CI builds a new image (tagged by commit short SHA), update this
           # line AND the matching image: line in k8s/cronjob.yaml to the same
           # tag, then commit/push. ArgoCD's selfHeal picks up the change and
