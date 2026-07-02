@@ -5,128 +5,299 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OddsJunction - Project Overview</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-        margin: 20px;
-        background-color: #f8f9fa;
-        color: #333;
-    }
-    h1 {
-        text-align: center;
-        color: #2c3e50;
-    }
-    h2 {
-        color: #34495e;
-        margin-top: 30px;
-    }
-    /* Diagram wrapper for scrolling */
-    .diagram-wrapper {
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        margin: 0 auto;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        background: #fff;
-        padding: 10px;
-        max-width: 100%;
-    }
-    svg {
-        height: auto;
-        min-width: 850px; /* Ensures horizontal scroll on mobile */
-    }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background: #f8f9fa;
+    color: #333;
+    padding: 16px;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    text-align: center;
+    color: #1a2e4a;
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+
+  /* Learning notice banner */
+  .notice {
+    background: #fff8e1;
+    border-left: 4px solid #f9a825;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .notice strong { color: #e65100; }
+
+  h2 {
+    color: #1a2e4a;
+    font-size: 1.1rem;
+    margin: 20px 0 10px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 4px;
+  }
+
+  p { margin-bottom: 12px; font-size: 0.95rem; }
+
+  /* Architecture diagram — fits on screen, no side scroll */
+  .diagram-wrapper {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Component list */
+  .components {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .component {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
+
+  .component strong {
+    display: block;
+    color: #1a2e4a;
+    margin-bottom: 2px;
+    font-size: 0.9rem;
+  }
+
+  /* Stack badge row */
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .badge {
+    background: #1a2e4a;
+    color: #fff;
+    font-size: 0.78rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .badge.green  { background: #2e7d32; }
+  .badge.orange { background: #e65100; }
+  .badge.purple { background: #6a1b9a; }
+  .badge.blue   { background: #1565c0; }
 </style>
 </head>
 <body>
+<div class="container">
 
-<h1>OddsJunction Project</h1>
-<p><strong>Sports Betting Odds Tracker for Australian Sports</strong></p>
+  <h1>OddsJunction</h1>
+  <p class="subtitle">Australian Sports Betting Odds Comparison</p>
 
-<h2>Overview</h2>
-<p>OddsJunction is a cloud-native application that automatically collects, processes, and displays betting odds for Australian sports including AFL, NRL, and Cricket. It uses AWS services for scalability, reliability, and automation — ensuring the latest odds are fetched every 6 minutes and made accessible via a responsive web interface.</p>
+  <div class="notice">
+    <strong>⚠️ Learning Project Notice</strong><br>
+    OddsJunction is a personal homelab and DevOps learning project built to demonstrate
+    cloud-native infrastructure, CI/CD pipelines, and GitOps practices.
+    It is not a commercial product. Odds data is for informational purposes only —
+    always verify with the bookmaker before placing any bet.
+  </div>
 
-<h2>Architecture & Data Flow</h2>
-<p>The diagram below shows the full architecture — from development to deployment, odds fetching, storage, and user delivery — along with monitoring.</p>
+  <h2>Overview</h2>
+  <p>
+    OddsJunction collects and displays betting odds from Australian bookmakers for AFL,
+    NRL, Cricket, Tennis, and UFC. The app runs entirely on a self-hosted 6-node
+    Kubernetes homelab cluster, deployed via GitOps using ArgoCD, with a full CI/CD
+    pipeline through self-hosted GitLab.
+  </p>
 
-<div class="diagram-wrapper">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
-    <defs>
-        <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L9,3 z" fill="#000" />
+  <h2>Tech Stack</h2>
+  <div class="badges">
+    <span class="badge">Kubernetes (kubeadm)</span>
+    <span class="badge green">ArgoCD GitOps</span>
+    <span class="badge blue">GitLab CI/CD</span>
+    <span class="badge blue">Kaniko (image builds)</span>
+    <span class="badge purple">CloudNativePG</span>
+    <span class="badge purple">Vault + External Secrets</span>
+    <span class="badge orange">Cloudflare Tunnel</span>
+    <span class="badge green">Longhorn Storage</span>
+    <span class="badge">MetalLB + ingress-nginx</span>
+    <span class="badge">Prometheus + Grafana</span>
+    <span class="badge">Loki + Promtail</span>
+    <span class="badge orange">Cilium + Hubble</span>
+    <span class="badge blue">Node.js + Express</span>
+  </div>
+
+  <h2>Architecture</h2>
+  <div class="diagram-wrapper">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 420">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
         </marker>
-    </defs>
+      </defs>
 
-    <!-- Deployment chain -->
-    <rect x="50" y="50" width="120" height="40" rx="8" fill="#3b3b3b"/>
-    <text x="110" y="75" fill="white" text-anchor="middle">VS Code</text>
+      <!-- Row 1: Dev → GitLab → CI -->
+      <rect x="10"  y="20" width="100" height="36" rx="6" fill="#3b3b3b"/>
+      <text x="60"  y="43" fill="white" text-anchor="middle" font-size="12">VS Code</text>
 
-    <rect x="200" y="50" width="120" height="40" rx="8" fill="#e74c3c"/>
-    <text x="260" y="75" fill="white" text-anchor="middle">GitHub</text>
+      <rect x="145" y="20" width="110" height="36" rx="6" fill="#e24329"/>
+      <text x="200" y="43" fill="white" text-anchor="middle" font-size="12">GitLab Repo</text>
 
-    <rect x="350" y="50" width="140" height="40" rx="8" fill="#34495e"/>
-    <text x="420" y="75" fill="white" text-anchor="middle">CodePipeline</text>
+      <rect x="290" y="20" width="120" height="36" rx="6" fill="#34495e"/>
+      <text x="350" y="37" fill="white" text-anchor="middle" font-size="11">GitLab CI</text>
+      <text x="350" y="50" fill="white" text-anchor="middle" font-size="10">(Kaniko build)</text>
 
-    <line x1="170" y1="70" x2="200" y2="70" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
-    <line x1="320" y1="70" x2="350" y2="70" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
-    <line x1="490" y1="70" x2="550" y2="150" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="445" y="20" width="120" height="36" rx="6" fill="#c0392b"/>
+      <text x="505" y="37" fill="white" text-anchor="middle" font-size="11">GitLab Registry</text>
+      <text x="505" y="50" fill="white" text-anchor="middle" font-size="10">(Docker image)</text>
 
-    <!-- Elastic Beanstalk center -->
-    <rect x="500" y="150" width="160" height="50" rx="8" fill="#e67e22"/>
-    <text x="580" y="180" fill="white" text-anchor="middle">Elastic Beanstalk</text>
+      <line x1="110" y1="38" x2="143" y2="38" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="255" y1="38" x2="288" y2="38" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="410" y1="38" x2="443" y2="38" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
 
-    <!-- Odds API -->
-    <rect x="500" y="50" width="160" height="40" rx="8" fill="#2ecc71"/>
-    <text x="580" y="75" fill="white" text-anchor="middle">The Odds API</text>
-    <line x1="580" y1="90" x2="580" y2="150" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Row 2: GitOps → ArgoCD -->
+      <rect x="145" y="100" width="110" height="36" rx="6" fill="#34495e"/>
+      <text x="200" y="118" fill="white" text-anchor="middle" font-size="11">GitOps Repo</text>
+      <text x="200" y="130" fill="white" text-anchor="middle" font-size="10">(k8s manifests)</text>
 
-    <!-- DynamoDB -->
-    <rect x="500" y="270" width="160" height="50" rx="8" fill="#f39c12"/>
-    <text x="580" y="300" fill="white" text-anchor="middle">AWS DynamoDB</text>
-    <line x1="580" y1="200" x2="580" y2="270" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="290" y="100" width="110" height="36" rx="6" fill="#ef5350"/>
+      <text x="345" y="123" fill="white" text-anchor="middle" font-size="12">ArgoCD</text>
 
-    <!-- CloudFront -->
-    <rect x="700" y="150" width="140" height="40" rx="8" fill="#9b59b6"/>
-    <text x="770" y="175" fill="white" text-anchor="middle">AWS CloudFront</text>
-    <line x1="660" y1="175" x2="700" y2="175" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="200" y1="56" x2="200" y2="98" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <line x1="255" y1="118" x2="288" y2="118" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="505" y1="56" x2="505" y2="90" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="505" y1="90" x2="355" y2="98" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
 
-    <!-- Route 53 -->
-    <rect x="700" y="220" width="140" height="40" rx="8" fill="#1abc9c"/>
-    <text x="770" y="245" fill="white" text-anchor="middle">AWS Route 53</text>
-    <line x1="770" y1="190" x2="770" y2="220" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Row 3: k8s cluster box -->
+      <rect x="10" y="175" width="580" height="185" rx="8" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1.5"/>
+      <text x="300" y="196" text-anchor="middle" font-size="11" fill="#7f8c8d">Kubernetes Homelab Cluster (6 nodes, 3 HP SFF boxes)</text>
 
-    <!-- Certificate Manager -->
-    <rect x="700" y="290" width="140" height="40" rx="8" fill="#2980b9"/>
-    <text x="770" y="315" fill="white" text-anchor="middle">Cert Manager</text>
-    <line x1="770" y1="260" x2="770" y2="290" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Web app -->
+      <rect x="30"  y="205" width="120" height="40" rx="6" fill="#1565c0"/>
+      <text x="90"  y="220" fill="white" text-anchor="middle" font-size="11">OddsJunction</text>
+      <text x="90"  y="235" fill="white" text-anchor="middle" font-size="10">Node.js app</text>
 
-    <!-- Users -->
-    <rect x="700" y="360" width="140" height="40" rx="8" fill="#3498db"/>
-    <text x="770" y="385" fill="white" text-anchor="middle">Users</text>
-    <line x1="770" y1="330" x2="770" y2="360" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- CronJob -->
+      <rect x="175" y="205" width="110" height="40" rx="6" fill="#6a1b9a"/>
+      <text x="230" y="220" fill="white" text-anchor="middle" font-size="11">CronJob</text>
+      <text x="230" y="235" fill="white" text-anchor="middle" font-size="10">Odds fetch ×2/day</text>
 
-    <!-- CloudWatch -->
-    <rect x="300" y="270" width="160" height="50" rx="8" fill="#8e44ad"/>
-    <text x="380" y="300" fill="white" text-anchor="middle">AWS CloudWatch</text>
-    <line x1="460" y1="295" x2="500" y2="295" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
-    <line x1="380" y1="270" x2="500" y2="175" stroke="black" stroke-width="1" marker-end="url(#arrow)"/>
-</svg>
+      <!-- CNPG -->
+      <rect x="310" y="205" width="110" height="40" rx="6" fill="#2e7d32"/>
+      <text x="365" y="220" fill="white" text-anchor="middle" font-size="11">CloudNativePG</text>
+      <text x="365" y="235" fill="white" text-anchor="middle" font-size="10">PostgreSQL</text>
+
+      <!-- Vault -->
+      <rect x="445" y="205" width="120" height="40" rx="6" fill="#e65100"/>
+      <text x="505" y="220" fill="white" text-anchor="middle" font-size="11">Vault + ESO</text>
+      <text x="505" y="235" fill="white" text-anchor="middle" font-size="10">Secrets management</text>
+
+      <!-- Monitoring row -->
+      <rect x="30"  y="270" width="100" height="36" rx="6" fill="#4a148c"/>
+      <text x="80"  y="288" fill="white" text-anchor="middle" font-size="10">Prometheus</text>
+      <text x="80"  y="300" fill="white" text-anchor="middle" font-size="10">+ Grafana</text>
+
+      <rect x="150" y="270" width="100" height="36" rx="6" fill="#1a237e"/>
+      <text x="200" y="288" fill="white" text-anchor="middle" font-size="10">Loki</text>
+      <text x="200" y="300" fill="white" text-anchor="middle" font-size="10">+ Promtail</text>
+
+      <rect x="270" y="270" width="100" height="36" rx="6" fill="#004d40"/>
+      <text x="320" y="288" fill="white" text-anchor="middle" font-size="10">Longhorn</text>
+      <text x="320" y="300" fill="white" text-anchor="middle" font-size="10">Storage</text>
+
+      <rect x="390" y="270" width="100" height="36" rx="6" fill="#37474f"/>
+      <text x="440" y="288" fill="white" text-anchor="middle" font-size="10">MetalLB</text>
+      <text x="440" y="300" fill="white" text-anchor="middle" font-size="10">+ ingress-nginx</text>
+
+      <rect x="510" y="270" width="65" height="36" rx="6" fill="#37474f"/>
+      <text x="542" y="288" fill="white" text-anchor="middle" font-size="10">Cilium</text>
+      <text x="542" y="300" fill="white" text-anchor="middle" font-size="10">CNI</text>
+
+      <!-- Arrows inside cluster -->
+      <line x1="230" y1="225" x2="312" y2="225" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="150" y1="225" x2="173" y2="225" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- ArgoCD → cluster -->
+      <line x1="345" y1="136" x2="345" y2="173" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Odds API -->
+      <rect x="630" y="205" width="130" height="40" rx="6" fill="#2ecc71" stroke="#27ae60"/>
+      <text x="695" y="220" fill="#1a2e4a" text-anchor="middle" font-size="11">The Odds API</text>
+      <text x="695" y="235" fill="#1a2e4a" text-anchor="middle" font-size="10">the-odds-api.com</text>
+
+      <line x1="630" y1="225" x2="592" y2="225" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Cloudflare tunnel -->
+      <rect x="630" y="100" width="130" height="36" rx="6" fill="#f38020"/>
+      <text x="695" y="118" fill="white" text-anchor="middle" font-size="11">Cloudflare Tunnel</text>
+      <text x="695" y="130" fill="white" text-anchor="middle" font-size="10">(no port forward)</text>
+
+      <!-- Users -->
+      <rect x="630" y="20" width="130" height="36" rx="6" fill="#1565c0"/>
+      <text x="695" y="43" fill="white" text-anchor="middle" font-size="12">Public Users 🌐</text>
+
+      <line x1="695" y1="56"  x2="695" y2="98"  stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="695" y1="136" x2="695" y2="173" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="630" y1="118" x2="592" y2="118" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="592" y1="118" x2="150" y2="210" stroke="#555" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+    </svg>
+  </div>
+
+  <h2>Component Roles</h2>
+  <div class="components">
+    <div class="component"><strong>VS Code</strong>Local development on Windows.</div>
+    <div class="component"><strong>GitLab (self-hosted)</strong>Code repo, CI pipeline, container registry — all in-cluster.</div>
+    <div class="component"><strong>Kaniko</strong>Builds Docker images inside GitLab CI without privileged Docker-in-Docker.</div>
+    <div class="component"><strong>ArgoCD</strong>GitOps controller — watches the manifest repo and syncs changes to the cluster automatically.</div>
+    <div class="component"><strong>CloudNativePG</strong>PostgreSQL operator managing the odds database with automated backups to S3.</div>
+    <div class="component"><strong>Vault + ESO</strong>HashiCorp Vault stores all secrets. External Secrets Operator syncs them into k8s Secrets automatically.</div>
+    <div class="component"><strong>k8s CronJob</strong>Fetches odds from the-odds-api.com twice daily (00:00 and 12:00 UTC) and writes to Postgres.</div>
+    <div class="component"><strong>Longhorn</strong>Distributed block storage across the cluster nodes for persistent volumes.</div>
+    <div class="component"><strong>MetalLB + ingress-nginx</strong>LoadBalancer IP pool and ingress controller for routing traffic to services.</div>
+    <div class="component"><strong>Cloudflare Tunnel</strong>Exposes services publicly without opening any ports on the home router. Home IP is never exposed.</div>
+    <div class="component"><strong>Cilium + Hubble</strong>eBPF-based CNI for network policy and Hubble for real-time network observability across the cluster.</div>
+    <div class="component"><strong>Prometheus + Grafana</strong>Metrics collection and dashboards for cluster and application monitoring.</div>
+    <div class="component"><strong>Loki + Promtail</strong>Log aggregation and querying across all pods in the cluster.</div>
+  </div>
+
+  <h2>CI/CD Flow</h2>
+  <p>
+    Code pushed to GitLab → pipeline triggers → Kaniko builds and pushes image to self-hosted registry →
+    pipeline commits the new image tag to the GitOps manifest repo →
+    ArgoCD detects the change → rolls out the new version to the cluster automatically.
+    No manual kubectl commands needed after the initial setup.
+  </p>
+
 </div>
-
-<h2>Component Roles</h2>
-<ul>
-    <li><strong>VS Code:</strong> Local development environment.</li>
-    <li><strong>GitHub:</strong> Code repository & version control.</li>
-    <li><strong>CodePipeline:</strong> CI/CD for automatic deployments.</li>
-    <li><strong>Elastic Beanstalk:</strong> Hosts app, runs cron jobs, serves frontend/API.</li>
-    <li><strong>The Odds API:</strong> External API for live odds.</li>
-    <li><strong>AWS DynamoDB:</strong> Stores odds history with TTL cleanup.</li>
-    <li><strong>CloudFront:</strong> CDN for fast content delivery.</li>
-    <li><strong>Route 53:</strong> DNS routing for the domain.</li>
-    <li><strong>Certificate Manager:</strong> SSL/TLS management.</li>
-    <li><strong>Users:</strong> Visitors using the OddsJunction site.</li>
-    <li><strong>CloudWatch:</strong> Monitoring and logging.</li>
-</ul>
-
 </body>
 </html>
