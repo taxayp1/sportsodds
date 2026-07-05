@@ -3,8 +3,8 @@ stages:
   - update-manifests
 
 variables:
-  IMAGE_TAG_SHA: "registry.taxayp.com/taxayp/oddsjunction:$CI_COMMIT_SHORT_SHA"
-  IMAGE_TAG_LATEST: "registry.taxayp.com/taxayp/oddsjunction:latest"
+  IMAGE_TAG_SHA: "registry.taxayp.com/taxayp/sportsodds:$CI_COMMIT_SHORT_SHA"
+  IMAGE_TAG_LATEST: "registry.taxayp.com/taxayp/sportsodds:latest"
   CI_REGISTRY: "registry.taxayp.com"
   GITOPS_REPO: "gitlab.taxayp.com/taxayp/K8s-HomeLab-Gitops.git"
 
@@ -51,10 +51,10 @@ update-manifests:
     - git clone "https://gitlab-ci-token:${GITOPS_TOKEN}@${GITOPS_REPO}" gitops
     - cd gitops
     - |
-      sed -i "s|registry.taxayp.com/taxayp/oddsjunction:.*|registry.taxayp.com/taxayp/oddsjunction:${CI_COMMIT_SHORT_SHA}|g" \
-        apps/oddsjunction/deployment.yaml \
-        apps/oddsjunction/cronjob.yaml
-    - git add apps/oddsjunction/deployment.yaml apps/oddsjunction/cronjob.yaml
+      sed -i "s|registry.taxayp.com/taxayp/sportsodds:.*|registry.taxayp.com/taxayp/sportsodds:${CI_COMMIT_SHORT_SHA}|g" \
+        apps/sportsodds/deployment.yaml \
+        apps/sportsodds/cronjob.yaml
+    - git add apps/sportsodds/deployment.yaml apps/sportsodds/cronjob.yaml
     - |
       if ! git diff --staged --quiet; then
         git commit -m "ci: bump oddsjunction image to ${CI_COMMIT_SHORT_SHA}"
