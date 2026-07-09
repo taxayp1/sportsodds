@@ -1102,10 +1102,10 @@ function renderRacing(payload) {
 
     const runnerRows = race.runners.map(rn => {
       const cells = rn.odds.map(o => `
-        <span class="racing-odd ${o.is_best ? 'best' : ''}">
+        <a class="racing-odd ${o.is_best ? 'best' : ''}" href="${generateBetLink(o.bookmaker)}" target="_blank" rel="noopener" title="Go to ${o.bookmaker.replace(/pointsbetau/, 'pointsbet').replace(/_/g, ' ')}">
           <img src="logo/${o.bookmaker}.png" alt="${o.bookmaker}" onerror="this.style.display='none'"/>
           ${(+o.price).toFixed(2)}
-        </span>`).join('');
+        </a>`).join('');
       return `
         <div class="racing-runner">
           <div class="racing-runner-head">

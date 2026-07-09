@@ -1021,21 +1021,21 @@ html {
 .racing-odd {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
+  gap: 6px;
+  padding: 5px 9px;
   border-radius: 6px;
   background: #f6f8fa;
   font-size: 13px;
   white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background .12s ease, transform .12s ease;
 }
-.racing-odd img {
-  width: 34px;
-  height: 16px;
-  object-fit: contain;
-  object-position: center;
-  flex: 0 0 auto;
-}
+.racing-odd:hover { background: #e6edf5; transform: translateY(-1px); }
+.racing-odd img { height: 22px; width: 48px; object-fit: contain; object-position: center; flex: 0 0 auto; }
 .racing-odd.best { background: #d7f5dd; font-weight: 700; }
+.racing-odd.best:hover { background: #c3eecd; }
 
 /* Mobile: single column, tighter odds chips, wrap the meta under the title */
 @media (max-width: 640px) {
@@ -1043,8 +1043,8 @@ html {
   .racing-card-head { flex-direction: column; }
   .racing-card-meta { text-align: left; }
   .racing-track { font-size: 16px; }
-  .racing-odd { padding: 3px 6px; font-size: 12px; gap: 4px; }
-  .racing-odd img { width: 30px; height: 14px; object-fit: contain; }
+  .racing-odd { padding: 4px 7px; font-size: 12px; gap: 5px; }
+  .racing-odd img { height: 19px; width: 42px; object-fit: contain; }
   .racing-pill { padding: 7px 14px; font-size: 13px; }
   #racing-filter-bar {
     flex-wrap: nowrap;
