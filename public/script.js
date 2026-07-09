@@ -152,6 +152,7 @@ header.appendChild(timeDisplay);
 async function loadSport(sportKey) {
   // ensure bookmaker filter is visible on normal sports
   setBookmakerFilterVisible(true);
+  removeRacingFilterBar();
   activeSport = sportKey;
   
   // Use smooth loading state
@@ -597,6 +598,7 @@ async function renderOdds(matches) {
 async function loadExchange(subSport = 'all') {
   // hide bookmaker filter immediately to avoid flash on first render
   setBookmakerFilterVisible(false);
+  removeRacingFilterBar();
   activeSport = 'exchange';
   
   // Use smooth loading state
@@ -1009,30 +1011,45 @@ function racingStartLabel(iso) {
   return `${Math.floor(mins / 60)}h ${mins % 60}m · ${hhmm}`;
 }
 
+function ensureRacingFilterBar() {
+  // The filter pills must live OUTSIDE #odds-container (which is a CSS grid) -
+  // otherwise the grid treats the pills row as a grid cell and squashes it into
+  // a column. We insert/reuse a full-width bar immediately before the container.
+  let bar = document.getElementById('racing-filter-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'racing-filter-bar';
+    container.parentNode.insertBefore(bar, container);
+  }
+  return bar;
+}
+
+function removeRacingFilterBar() {
+  const bar = document.getElementById('racing-filter-bar');
+  if (bar) bar.remove();
+}
+
 function renderRacing(payload) {
   const dropdown = document.getElementById('bookmakerFilter');
   if (dropdown) dropdown.style.display = 'none';
 
   const races = (payload && Array.isArray(payload.races)) ? payload.races : [];
 
-  // code sub-filter pills (T/H/G/all) - reuse sport-nav look via inline chips
-  const pills = ['all', 'T', 'H', 'G'].map(c => {
+  // pills OUTSIDE the grid, in their own full-width bar
+  const bar = ensureRacingFilterBar();
+  bar.innerHTML = ['all', 'T', 'H', 'G'].map(c => {
     const on = (lastRacingCode === c);
     const label = c === 'all' ? 'All' : RACING_CODE_LABEL[c];
-    return `<button onclick="loadRacing('${c}')"
-      style="padding:6px 14px;border-radius:20px;border:1px solid #d0d7de;cursor:pointer;
-      font-weight:600;font-size:13px;background:${on ? '#0b5cad' : '#fff'};color:${on ? '#fff' : '#24292f'};">
-      ${label}</button>`;
-  }).join(' ');
+    return `<button class="racing-pill ${on ? 'active' : ''}" onclick="loadRacing('${c}')">${label}</button>`;
+  }).join('');
 
   if (!races.length) {
     container.innerHTML =
-      `<div style="display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap;">${pills}</div>
-       <p style="padding:20px;">No upcoming AU races with your bookmakers right now. Check back soon.</p>`;
+      `<p style="padding:20px;grid-column:1/-1;">No upcoming AU races with your bookmakers right now. Check back soon.</p>`;
     return;
   }
 
-  const cards = races.map(race => {
+  container.innerHTML = races.map(race => {
     const icon = RACING_CODE_ICON[race.racing_code] || '🏁';
     const codeLabel = RACING_CODE_LABEL[race.racing_code] || race.racing_code;
     const loc = race.location ? ` · ${race.location}` : '';
@@ -1040,42 +1057,35 @@ function renderRacing(payload) {
     const header = `${race.track} R${race.race_number}`;
     const start = racingStartLabel(race.start_time);
 
-    // union of bookies present in this race, ordered by how often they lead
     const runnerRows = race.runners.map(rn => {
       const cells = rn.odds.map(o => `
-        <span class="racing-odd ${o.is_best ? 'highlight' : ''}"
-          style="display:inline-flex;align-items:center;gap:5px;padding:4px 8px;margin:3px;
-          border-radius:6px;${o.is_best ? 'background:#d7f5dd;font-weight:700;' : 'background:#f6f8fa;'}">
-          <img src="logo/${o.bookmaker}.png" alt="${o.bookmaker}"
-            style="height:16px;width:auto;" onerror="this.style.display='none'"/>
+        <span class="racing-odd ${o.is_best ? 'best' : ''}">
+          <img src="logo/${o.bookmaker}.png" alt="${o.bookmaker}" onerror="this.style.display='none'"/>
           ${(+o.price).toFixed(2)}
         </span>`).join('');
       return `
-        <div style="padding:8px 0;border-top:1px solid #eaeef2;">
-          <div style="font-weight:600;margin-bottom:2px;">
-            ${rn.runner_number}. ${rn.runner_name}
-            <span style="color:#0b7a2f;font-weight:700;margin-left:6px;">best ${(+rn.best_odds).toFixed(2)}</span>
+        <div class="racing-runner">
+          <div class="racing-runner-head">
+            <span class="racing-runner-name">${rn.runner_number}. ${rn.runner_name}</span>
+            <span class="racing-best">best ${(+rn.best_odds).toFixed(2)}</span>
           </div>
-          <div>${cells}</div>
+          <div class="racing-odds-row">${cells}</div>
         </div>`;
     }).join('');
 
     return `
-      <div class="odds-card card-entrance" style="border:2px solid #ff8c00;border-radius:12px;padding:16px;margin-bottom:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
-          <div>
-            <div style="font-size:18px;font-weight:800;">${header}</div>
-            <div style="color:#57606a;font-size:13px;">${race.race_name || ''}</div>
+      <div class="odds-card racing-card card-entrance">
+        <div class="racing-card-head">
+          <div class="racing-card-title">
+            <div class="racing-track">${header}</div>
+            <div class="racing-racename">${race.race_name || ''}</div>
           </div>
-          <div style="text-align:right;">
-            <span style="display:inline-block;background:#0b5cad;color:#fff;padding:3px 10px;border-radius:14px;font-size:12px;font-weight:700;">${tag}</span>
-            <div style="color:#ff8c00;font-weight:700;margin-top:4px;">${start}</div>
+          <div class="racing-card-meta">
+            <span class="racing-tag">${tag}</span>
+            <div class="racing-start">${start}</div>
           </div>
         </div>
         ${runnerRows}
       </div>`;
   }).join('');
-
-  container.innerHTML =
-    `<div style="display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap;">${pills}</div>${cards}`;
 }
