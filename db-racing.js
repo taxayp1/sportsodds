@@ -152,11 +152,13 @@ async function getBoard(racingCode = null, maxAgeHours = 6) {
   })
   .filter((race) => race.runners.length > 0)
   .filter((race) => {
-    // show races from 30 min ago up to 12h ahead. start_time is stored as UTC
-    // ISO (normalized at ingest), so Date parsing is timezone-safe here.
+    // Show upcoming races and ones that jumped very recently (short grace so a
+    // just-started race doesn't vanish mid-view). Races more than 3 min past
+    // start are effectively done - drop them so the board shows 'next to jump',
+    // not finished races. start_time is stored as UTC ISO (normalized at ingest).
     const t = new Date(race.start_time).getTime();
     if (!isFinite(t)) return true; // if unparseable, don't hide it
-    return t > now - 30 * 60 * 1000 && t < now + 12 * 60 * 60 * 1000;
+    return t > now - 3 * 60 * 1000 && t < now + 12 * 60 * 60 * 1000;
   })
   .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 }

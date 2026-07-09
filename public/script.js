@@ -1030,7 +1030,9 @@ function racingStartLabel(iso) {
   const diff = t - Date.now();
   const mins = Math.round(diff / 60000);
   const hhmm = new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
-  if (mins <= 0 && mins > -30) return `Jumped · ${hhmm}`;
+  // already started
+  if (mins <= 0) return `Jumped · ${hhmm}`;
+  // upcoming
   if (mins < 60) return `${mins}m · ${hhmm}`;
   return `${Math.floor(mins / 60)}h ${mins % 60}m · ${hhmm}`;
 }
