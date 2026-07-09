@@ -13,6 +13,9 @@ RUN npm install --omit=dev
 # App code
 COPY server.js cronFetch.js db.js betfairExchange.js ./
 
+# Racing odds fetcher
+COPY racingFetch.js db-racing.js racingBookies.js ./
+
 # Frontend - copy entire public/ folder (index.html, style.css, script.js, logos, icons)
 # Keep files in public/ locally too - no more moving them around
 COPY public/ ./public/
