@@ -65,9 +65,15 @@ async function ensureSchema() {
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_rboard_start ON racing_board(start_time)`);
 }
 
+// Schema init runs on require. IMPORTANT: unlike db.js, a failure here must NOT
+// process.exit() - db-racing is required by the long-running web server, and a
+// racing hiccup should never take down the working sports/exchange tabs. The
+// short-lived fetch job (racingFetch.js) checks schemaReady and will surface
+// errors on its own writes instead. We swallow the error here and let individual
+// queries fail gracefully (routes already try/catch -> 500 for racing only).
 const schemaReady = ensureSchema().catch((err) => {
-  console.error('❌ Failed to initialize racing schema:', err.message);
-  process.exit(1);
+  console.error('❌ Failed to initialize racing schema (racing disabled, rest of app unaffected):', err.message);
+  // do NOT exit - keep the web server alive for sports/exchange.
 });
 
 // --- WRITE (racingFetch.js) -------------------------------------------------
@@ -146,9 +152,11 @@ async function getBoard(racingCode = null, maxAgeHours = 6) {
   })
   .filter((race) => race.runners.length > 0)
   .filter((race) => {
-    // show races starting within the next 6h or started < 30m ago
+    // show races from 30 min ago up to 12h ahead. start_time is stored as UTC
+    // ISO (normalized at ingest), so Date parsing is timezone-safe here.
     const t = new Date(race.start_time).getTime();
-    return !isFinite(t) || (t > now - 30 * 60 * 1000 && t < now + 6 * 60 * 60 * 1000);
+    if (!isFinite(t)) return true; // if unparseable, don't hide it
+    return t > now - 30 * 60 * 1000 && t < now + 12 * 60 * 60 * 1000;
   })
   .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 }

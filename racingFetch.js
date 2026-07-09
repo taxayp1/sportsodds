@@ -36,6 +36,21 @@ function pick(obj, ...keys) {
   return undefined;
 }
 
+// oddspro /api/meetings returns startTime as "YYYY-MM-DD HH:MM:SS" (space, no TZ).
+// new Date() parses that as LOCAL time, which breaks the read-side time window on
+// any pod not set to UTC. Normalize to explicit UTC ISO ("...T...Z") at ingest so
+// start_time is stored unambiguously, matching how the sports pipeline stores ISO.
+function toUtcIso(s) {
+  if (!s) return s;
+  if (typeof s !== 'string') return s;
+  // already ISO with T? trust it.
+  if (s.includes('T')) return s;
+  // "2026-07-09 06:00:00" -> "2026-07-09T06:00:00Z" (oddspro times are UTC)
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})/);
+  if (m) return `${m[1]}T${m[2]}Z`;
+  return s;
+}
+
 // One call returns the full tree for all codes. We fetch once and bucket by code.
 async function fetchAllMeetings() {
   try {
@@ -78,7 +93,7 @@ async function runAll() {
       for (const race of races) {
         const raceNumber = pick(race, 'number', 'raceNumber');
         const raceName = pick(race, 'name', 'raceName');
-        const startTime = pick(race, 'startTime', 'raceStartTime');
+        const startTime = toUtcIso(pick(race, 'startTime', 'raceStartTime'));
         const raceKey = `${code}|${track}|${raceNumber}`;
         const runners = pick(race, 'runners') || [];
 
