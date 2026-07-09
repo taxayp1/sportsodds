@@ -3,6 +3,7 @@
 const container = document.getElementById('odds-container');
 let allMatches = [];
 let activeSport = '';
+let lastRacingCode = 'all';
 let lastOddsMap = new Map();
 let lastExchangeList = []; // cache last exchange payload
 
@@ -910,7 +911,9 @@ window.addEventListener('DOMContentLoaded', () => {
   };
   
   const mappedSport = sportMap[sport] || sport;
-  if (mappedSport === 'exchange') { loadExchange('all'); } else { loadSport(mappedSport); }
+  if (mappedSport === 'racing') { loadRacing('all'); }
+  else if (mappedSport === 'exchange') { loadExchange('all'); }
+  else { loadSport(mappedSport); }
 
   let pageVisible = true;
   document.addEventListener('visibilitychange', () => {
@@ -935,7 +938,10 @@ window.addEventListener('DOMContentLoaded', () => {
     timeDisplay.style.transform = 'scale(0.9)';
     timeDisplay.style.opacity = '0.7';
     
-    if (mappedActive === 'exchange') {
+    if (mappedActive === 'racing') {
+      console.log('Auto-refreshing racing board...');
+      loadRacing(lastRacingCode || 'all');
+    } else if (mappedActive === 'exchange') {
       console.log('Auto-refreshing exchange markets...');
       loadExchange('all');
     } else {
@@ -966,8 +972,6 @@ function populateBookmakerDropdown(matches) {
 }
 // ===== Racing Tab Support (oddspro best-odds board) =====
 // Sub-filter across racing codes. 'all' shows T+H+G interleaved by start time.
-let lastRacingCode = 'all';
-
 async function loadRacing(code = 'all') {
   setBookmakerFilterVisible(false);
   activeSport = 'racing';
