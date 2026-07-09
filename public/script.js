@@ -4,6 +4,7 @@ const container = document.getElementById('odds-container');
 let allMatches = [];
 let activeSport = '';
 let lastRacingCode = 'all';
+let lastRacingPayload = { races: [] };
 let lastOddsMap = new Map();
 let lastExchangeList = []; // cache last exchange payload
 
@@ -65,7 +66,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
   
   debouncedSearch(() => {
     requestAnimationFrame(() => {
-      if (activeSport === 'exchange') { renderExchange(lastExchangeList); }
+      if (activeSport === 'racing') { renderRacing(lastRacingPayload); }
+      else if (activeSport === 'exchange') { renderExchange(lastExchangeList); }
       else { renderOdds(allMatches); }
       
       // Restore normal background
@@ -78,7 +80,8 @@ document.getElementById('searchInput').addEventListener('input', () => {
 
 document.getElementById('bookmakerFilter').addEventListener('change', () => {
   requestAnimationFrame(() => {
-    if (activeSport === 'exchange') { renderExchange(lastExchangeList); }
+    if (activeSport === 'racing') { renderRacing(lastRacingPayload); }
+    else if (activeSport === 'exchange') { renderExchange(lastExchangeList); }
     else { renderOdds(allMatches); }
   });
 });
@@ -975,7 +978,7 @@ function populateBookmakerDropdown(matches) {
 // ===== Racing Tab Support (oddspro best-odds board) =====
 // Sub-filter across racing codes. 'all' shows T+H+G interleaved by start time.
 async function loadRacing(code = 'all') {
-  setBookmakerFilterVisible(false);
+  setBookmakerFilterVisible(true);
   activeSport = 'racing';
   lastRacingCode = code;
   showLoadingState();
@@ -986,7 +989,9 @@ async function loadRacing(code = 'all') {
     const res = await fetch(url, { headers: { 'Cache-Control': 'no-cache' } });
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const payload = await res.json();
-    renderRacing(payload);
+    lastRacingPayload = payload && Array.isArray(payload.races) ? payload : { races: [] };
+    populateRacingBookmakerDropdown(lastRacingPayload);
+    renderRacing(lastRacingPayload);
     if (payload.dataAsOf) {
       const asOf = new Date(payload.dataAsOf).toLocaleString('en-AU', { timeStyle: 'short' });
       timeDisplay.textContent = `Odds as of: ${asOf}`;
@@ -995,6 +1000,25 @@ async function loadRacing(code = 'all') {
     console.error('Error loading racing:', err);
     container.innerHTML = `<p style="padding:20px;">Error loading racing: ${err.message}.</p>`;
   }
+}
+
+// Populate the shared bookmaker dropdown with the bookies present across racing.
+function populateRacingBookmakerDropdown(payload) {
+  const dropdown = document.getElementById('bookmakerFilter');
+  if (!dropdown) return;
+  const prev = dropdown.value;
+  const bookies = new Set();
+  (payload.races || []).forEach(race =>
+    race.runners.forEach(rn => rn.odds.forEach(o => bookies.add(o.bookmaker))));
+  dropdown.innerHTML = '<option value="">All Bookmakers</option>';
+  [...bookies].sort().forEach(bk => {
+    const opt = document.createElement('option');
+    opt.value = bk;
+    opt.textContent = bk.replace(/_au$/, '').replace(/pointsbetau/, 'pointsbet').replace(/_/g, ' ');
+    dropdown.appendChild(opt);
+  });
+  // keep prior selection if still valid
+  if (prev && bookies.has(prev)) dropdown.value = prev;
 }
 
 const RACING_CODE_LABEL = { T: 'Horse Racing', H: 'Harness', G: 'Greyhound' };
@@ -1030,10 +1054,7 @@ function removeRacingFilterBar() {
 }
 
 function renderRacing(payload) {
-  const dropdown = document.getElementById('bookmakerFilter');
-  if (dropdown) dropdown.style.display = 'none';
-
-  const races = (payload && Array.isArray(payload.races)) ? payload.races : [];
+  const races0 = (payload && Array.isArray(payload.races)) ? payload.races : [];
 
   // pills OUTSIDE the grid, in their own full-width bar
   const bar = ensureRacingFilterBar();
@@ -1043,9 +1064,31 @@ function renderRacing(payload) {
     return `<button class="racing-pill ${on ? 'active' : ''}" onclick="loadRacing('${c}')">${label}</button>`;
   }).join('');
 
+  // --- apply search + bookmaker filters (same inputs as the sports tabs) ---
+  const term = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+  const bookieFilter = document.getElementById('bookmakerFilter')?.value || '';
+
+  let races = races0;
+  if (term) {
+    races = races.filter(r =>
+      (`${r.track} r${r.race_number} ${r.race_name || ''}`.toLowerCase().includes(term)) ||
+      r.runners.some(rn => (rn.runner_name || '').toLowerCase().includes(term)));
+  }
+  if (bookieFilter) {
+    // keep only races/runners that have the selected bookie, and show only its price
+    races = races
+      .map(r => ({
+        ...r,
+        runners: r.runners
+          .map(rn => ({ ...rn, odds: rn.odds.filter(o => o.bookmaker === bookieFilter) }))
+          .filter(rn => rn.odds.length > 0)
+      }))
+      .filter(r => r.runners.length > 0);
+  }
+
   if (!races.length) {
     container.innerHTML =
-      `<p style="padding:20px;grid-column:1/-1;">No upcoming AU races with your bookmakers right now. Check back soon.</p>`;
+      `<p style="padding:20px;grid-column:1/-1;">No races match your filters.</p>`;
     return;
   }
 
