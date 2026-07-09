@@ -10,6 +10,9 @@ const db = require('./db');
 const BetfairExchange = require('./betfairExchange');
 const betfair = new BetfairExchange();
 
+// ----- Racing board support (oddspro.com.au /movers) -----
+const dbRacing = require('./db-racing');
+
 const sportKeyMap = {
   afl:     ['61420', 'aussierules_afl'],
   nrl:     ['1477',  'rugbyleague_nrl'],
@@ -526,6 +529,25 @@ app.get('/debug/competitions', async (req, res) => {
   } catch (err) {
     console.error('âŒ Error fetching competitions:', err);
     res.status(500).json({ error: 'Failed to fetch competitions', details: err.message });
+  }
+});
+
+// ---------- RACING (best-odds board from oddspro /movers) ----------
+// GET /odds-db/racing            -> all codes
+// GET /odds-db/racing?code=T     -> Thoroughbred | H Harness | G Greyhound
+// Response: { dataAsOf, races: [ { race tag + runners[ { odds[], best } ] } ] }
+app.get('/odds-db/racing', async (req, res) => {
+  try {
+    const codeRaw = (req.query.code || '').trim().toUpperCase();
+    const code = ['T', 'H', 'G'].includes(codeRaw) ? codeRaw : null;
+    const [races, dataAsOf] = await Promise.all([
+      dbRacing.getBoard(code, 6),
+      dbRacing.getLastFetchedAt()
+    ]);
+    res.json({ dataAsOf, code: code || 'all', count: races.length, races });
+  } catch (err) {
+    console.error('❌ RACING error:', err.message);
+    res.status(500).json({ error: 'Failed to load racing board' });
   }
 });
 

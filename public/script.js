@@ -835,7 +835,9 @@ function selectTab(sportKey) {
   
   // Call with small delay for smooth transition
   setTimeout(() => {
-    if (sportKey === 'exchange' || mappedSport === 'exchange') { 
+    if (sportKey === 'racing' || mappedSport === 'racing') {
+      loadRacing('all');
+    } else if (sportKey === 'exchange' || mappedSport === 'exchange') { 
       loadExchange('all'); 
     } else { 
       loadSport(mappedSport); 
@@ -961,4 +963,115 @@ function populateBookmakerDropdown(matches) {
     opt.textContent = bk.replace(/_au$/, '').replace(/_/g, ' ').replace('betfair_ex_au', 'betfair').replace('betfair_ex', 'betfair');
     dropdown.appendChild(opt);
   });
+}
+// ===== Racing Tab Support (oddspro best-odds board) =====
+// Sub-filter across racing codes. 'all' shows T+H+G interleaved by start time.
+let lastRacingCode = 'all';
+
+async function loadRacing(code = 'all') {
+  setBookmakerFilterVisible(false);
+  activeSport = 'racing';
+  lastRacingCode = code;
+  showLoadingState();
+
+  try {
+    const q = (code && code !== 'all') ? `code=${encodeURIComponent(code)}&` : '';
+    const url = `/odds-db/racing?${q}t=${Date.now()}`;
+    const res = await fetch(url, { headers: { 'Cache-Control': 'no-cache' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const payload = await res.json();
+    renderRacing(payload);
+    if (payload.dataAsOf) {
+      const asOf = new Date(payload.dataAsOf).toLocaleString('en-AU', { timeStyle: 'short' });
+      timeDisplay.textContent = `Odds as of: ${asOf}`;
+    }
+  } catch (err) {
+    console.error('Error loading racing:', err);
+    container.innerHTML = `<p style="padding:20px;">Error loading racing: ${err.message}.</p>`;
+  }
+}
+
+const RACING_CODE_LABEL = { T: 'Horse Racing', H: 'Harness', G: 'Greyhound' };
+const RACING_CODE_ICON  = { T: '🐎', H: '🏇', G: '🐕' };
+
+function racingStartLabel(iso) {
+  const t = new Date(iso).getTime();
+  if (!isFinite(t)) return '';
+  const diff = t - Date.now();
+  const mins = Math.round(diff / 60000);
+  const hhmm = new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+  if (mins <= 0 && mins > -30) return `Jumped · ${hhmm}`;
+  if (mins < 60) return `${mins}m · ${hhmm}`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}m · ${hhmm}`;
+}
+
+function renderRacing(payload) {
+  const dropdown = document.getElementById('bookmakerFilter');
+  if (dropdown) dropdown.style.display = 'none';
+
+  const races = (payload && Array.isArray(payload.races)) ? payload.races : [];
+
+  // code sub-filter pills (T/H/G/all) - reuse sport-nav look via inline chips
+  const pills = ['all', 'T', 'H', 'G'].map(c => {
+    const on = (lastRacingCode === c);
+    const label = c === 'all' ? 'All' : RACING_CODE_LABEL[c];
+    return `<button onclick="loadRacing('${c}')"
+      style="padding:6px 14px;border-radius:20px;border:1px solid #d0d7de;cursor:pointer;
+      font-weight:600;font-size:13px;background:${on ? '#0b5cad' : '#fff'};color:${on ? '#fff' : '#24292f'};">
+      ${label}</button>`;
+  }).join(' ');
+
+  if (!races.length) {
+    container.innerHTML =
+      `<div style="display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap;">${pills}</div>
+       <p style="padding:20px;">No upcoming AU races with your bookmakers right now. Check back soon.</p>`;
+    return;
+  }
+
+  const cards = races.map(race => {
+    const icon = RACING_CODE_ICON[race.racing_code] || '🏁';
+    const codeLabel = RACING_CODE_LABEL[race.racing_code] || race.racing_code;
+    const loc = race.location ? ` · ${race.location}` : '';
+    const tag = `${icon} ${codeLabel}${loc}`;
+    const header = `${race.track} R${race.race_number}`;
+    const start = racingStartLabel(race.start_time);
+
+    // union of bookies present in this race, ordered by how often they lead
+    const runnerRows = race.runners.map(rn => {
+      const cells = rn.odds.map(o => `
+        <span class="racing-odd ${o.is_best ? 'highlight' : ''}"
+          style="display:inline-flex;align-items:center;gap:5px;padding:4px 8px;margin:3px;
+          border-radius:6px;${o.is_best ? 'background:#d7f5dd;font-weight:700;' : 'background:#f6f8fa;'}">
+          <img src="logo/${o.bookmaker}.png" alt="${o.bookmaker}"
+            style="height:16px;width:auto;" onerror="this.style.display='none'"/>
+          ${(+o.price).toFixed(2)}
+        </span>`).join('');
+      return `
+        <div style="padding:8px 0;border-top:1px solid #eaeef2;">
+          <div style="font-weight:600;margin-bottom:2px;">
+            ${rn.runner_number}. ${rn.runner_name}
+            <span style="color:#0b7a2f;font-weight:700;margin-left:6px;">best ${(+rn.best_odds).toFixed(2)}</span>
+          </div>
+          <div>${cells}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="odds-card card-entrance" style="border:2px solid #ff8c00;border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:18px;font-weight:800;">${header}</div>
+            <div style="color:#57606a;font-size:13px;">${race.race_name || ''}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="display:inline-block;background:#0b5cad;color:#fff;padding:3px 10px;border-radius:14px;font-size:12px;font-weight:700;">${tag}</span>
+            <div style="color:#ff8c00;font-weight:700;margin-top:4px;">${start}</div>
+          </div>
+        </div>
+        ${runnerRows}
+      </div>`;
+  }).join('');
+
+  container.innerHTML =
+    `<div style="display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap;">${pills}</div>${cards}`;
 }
