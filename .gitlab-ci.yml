@@ -53,8 +53,9 @@ update-manifests:
     - |
       sed -i "s|registry.taxayp.com/taxayp/sportsodds:.*|registry.taxayp.com/taxayp/sportsodds:${CI_COMMIT_SHORT_SHA}|g" \
         apps/sportsodds/deployment.yaml \
-        apps/sportsodds/cronjob.yaml
-    - git add apps/sportsodds/deployment.yaml apps/sportsodds/cronjob.yaml
+        apps/sportsodds/cronjob.yaml \
+        apps/sportsodds/racing-cronjob.yaml
+    - git add apps/sportsodds/deployment.yaml apps/sportsodds/cronjob.yaml apps/sportsodds/racing-cronjob.yaml
     - |
       if ! git diff --staged --quiet; then
         git commit -m "ci: bump oddsjunction image to ${CI_COMMIT_SHORT_SHA}"
