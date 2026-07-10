@@ -3,21 +3,22 @@ FROM node:20-bookworm-slim
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Non-root user
+
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
+
 RUN groupadd --gid 1001 nodeapp \
     && useradd --uid 1001 --gid nodeapp --shell /bin/bash --create-home nodeapp
 
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# App code
-COPY server.js cronFetch.js db.js betfairExchange.js ./
 
-# Racing odds fetcher
+COPY server.js cronFetch.js db.js betfairExchange.js ./
 COPY racingFetch.js db-racing.js racingBookies.js ./
 
-# Frontend - copy entire public/ folder (index.html, style.css, script.js, logos, icons)
-# Keep files in public/ locally too - no more moving them around
 COPY public/ ./public/
 
 RUN chown -R nodeapp:nodeapp /app
