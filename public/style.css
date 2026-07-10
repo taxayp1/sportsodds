@@ -14,6 +14,7 @@
   --bg:          #eef1f6;
   --surface:     #ffffff;
   --surface-2:   #f6f8fb;
+  --card-bg:     #fffdf7;   /* subtle warm tint for cards (racing feel) */
   --ink:         #1a2332;
   --ink-soft:    #5a6472;
   --border:      #e2e7ee;
@@ -42,6 +43,7 @@
   --bg:          #0d1520;
   --surface:     #161f2e;
   --surface-2:   #1d2838;
+  --card-bg:     #161f2e;   /* no warm tint in dark mode */
   --ink:         #e8edf3;
   --ink-soft:    #9aa7b8;
   --border:      #2a3547;
@@ -196,8 +198,8 @@ nav button {
   margin: 0 auto;
 }
 
-.match-card {
-  background: var(--surface);
+.match-card, .racing-card {
+  background: var(--card-bg, var(--surface));
   border-radius: var(--radius);
   padding: 1rem 1rem 1rem 1.15rem;
   box-shadow: var(--shadow-md);
@@ -206,7 +208,7 @@ nav button {
   min-width: 350px;
   margin-bottom: 0;
   border: 1px solid var(--border);
-  border-left: 4px solid var(--gold);   /* signature accent bar */
+  border-left: 4px solid var(--gold);   /* signature gold accent bar */
   transition: transform .15s ease, box-shadow .15s ease, background .25s ease;
 }
 .match-card:hover {
@@ -242,13 +244,13 @@ nav button {
 .match-card.live-match {
   border: 2px solid #ff4444;
   box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
-  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+  background: var(--surface);
 }
 
 .match-card.upcoming-match {
   border: 2px solid #ff9800;
   box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
-  background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+  background: var(--surface);
 }
 
 /* Status text styling */
@@ -352,14 +354,16 @@ th {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  background: #fff;
-  border-bottom: 1px solid #ccc;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
 
 #searchInput {
   flex: 1;
   max-width: 300px;
+  background: var(--surface-2);
+  color: var(--ink);
   padding: 0.5rem;
   font-size: 1rem;
   border-radius: 5px;
@@ -425,7 +429,7 @@ td canvas.sparkline {
 
 /* T&C Section Style */
 .terms-section {
-  background-color: #04366b;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
   color: white;
   text-align: center;
   padding: 25px 20px;
@@ -445,7 +449,7 @@ td canvas.sparkline {
 }
 
 .terms-section a {
-  color: #ffdd57;
+  color: var(--gold);
 }
 
 /* Sport tag styling */
@@ -1188,21 +1192,22 @@ html {
 /* ===== Theme toggle button ===== */
 .theme-toggle {
   position: absolute;
-  top: 1rem;
+  top: 0.9rem;
   right: 1rem;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,.25);
   background: rgba(255,255,255,.10);
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background .15s ease, transform .15s ease;
+  z-index: 5;
 }
 .theme-toggle:hover { background: rgba(255,255,255,.22); transform: scale(1.08); }
 
@@ -1309,22 +1314,26 @@ html {
 /* ===== Exchange H2H chip design ===== */
 .exc-matched-row { font-size: 12px; color: var(--ink-soft); margin: 2px 0 10px; }
 .exc-matched-row strong { color: var(--ink); }
-.exc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.exc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
 .exc-side {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
 }
 .exc-team {
   font-weight: 700;
   font-size: 13px;
   color: var(--ink);
   margin-bottom: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  line-height: 1.3;
 }
 .exc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .exc-cell {
