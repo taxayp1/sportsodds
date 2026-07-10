@@ -5,6 +5,7 @@ let allMatches = [];
 let activeSport = '';
 let lastRacingCode = 'all';
 let lastRacingPayload = { races: [] };
+let lastExchangeSport = 'all';
 let lastOddsMap = new Map();
 let lastExchangeList = []; // cache last exchange payload
 
@@ -156,6 +157,7 @@ async function loadSport(sportKey) {
   // ensure bookmaker filter is visible on normal sports
   setBookmakerFilterVisible(true);
   removeRacingFilterBar();
+  removeExchangeFilterBar();
   activeSport = sportKey;
   
   // Use smooth loading state
@@ -603,7 +605,16 @@ async function loadExchange(subSport = 'all') {
   setBookmakerFilterVisible(false);
   removeRacingFilterBar();
   activeSport = 'exchange';
-  
+  lastExchangeSport = subSport;
+
+  // sub-sport pills (backend supports afl/nrl/cricket/tennis; 'all' = everything)
+  const bar = ensureExchangeFilterBar();
+  const pills = [['all','All'],['afl','AFL'],['nrl','NRL'],['cricket','Cricket'],['tennis','Tennis']];
+  bar.innerHTML = pills.map(([v,label]) => {
+    const on = (lastExchangeSport === v);
+    return `<button class="sub-pill ${on ? 'active' : ''}" onclick="loadExchange('${v}')">${label}</button>`;
+  }).join('');
+
   // Use smooth loading state
   showLoadingState();
   
@@ -948,7 +959,7 @@ window.addEventListener('DOMContentLoaded', () => {
       loadRacing(lastRacingCode || 'all');
     } else if (mappedActive === 'exchange') {
       console.log('Auto-refreshing exchange markets...');
-      loadExchange('all');
+      loadExchange(lastExchangeSport || 'all');
     } else {
       console.log(`Auto-refreshing ${mappedActive} matches...`);
       loadSport(mappedActive);
@@ -979,6 +990,7 @@ function populateBookmakerDropdown(matches) {
 // Sub-filter across racing codes. 'all' shows T+H+G interleaved by start time.
 async function loadRacing(code = 'all') {
   setBookmakerFilterVisible(true);
+  removeExchangeFilterBar();
   activeSport = 'racing';
   lastRacingCode = code;
   showLoadingState();
@@ -1037,21 +1049,28 @@ function racingStartLabel(iso) {
   return `${Math.floor(mins / 60)}h ${mins % 60}m · ${hhmm}`;
 }
 
-function ensureRacingFilterBar() {
-  // The filter pills must live OUTSIDE #odds-container (which is a CSS grid) -
-  // otherwise the grid treats the pills row as a grid cell and squashes it into
-  // a column. We insert/reuse a full-width bar immediately before the container.
-  let bar = document.getElementById('racing-filter-bar');
+function ensureFilterBar(id) {
+  // A full-width pill bar that lives OUTSIDE #odds-container (which is a CSS
+  // grid) so the grid doesn't squash it into a column. Shared by racing +
+  // exchange sub-filters.
+  let bar = document.getElementById(id);
   if (!bar) {
     bar = document.createElement('div');
-    bar.id = 'racing-filter-bar';
+    bar.id = id;
+    bar.className = 'sub-filter-bar';
     container.parentNode.insertBefore(bar, container);
   }
   return bar;
 }
+function ensureRacingFilterBar() { return ensureFilterBar('racing-filter-bar'); }
+function ensureExchangeFilterBar() { return ensureFilterBar('exchange-filter-bar'); }
 
 function removeRacingFilterBar() {
   const bar = document.getElementById('racing-filter-bar');
+  if (bar) bar.remove();
+}
+function removeExchangeFilterBar() {
+  const bar = document.getElementById('exchange-filter-bar');
   if (bar) bar.remove();
 }
 

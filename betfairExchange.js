@@ -135,57 +135,32 @@ class BetfairExchange {
 
 
 
-  // NEW: US Open Men's Singles tennis filtering
-  _usOpenTennisAllowed(comp = '', evt = '') {
+  // General tennis singles filter (any tournament - Wimbledon, US Open, etc).
+  // Keeps real head-to-head singles matches; drops doubles/juniors/qualifiers
+  // and other non-match markets. Tournament-agnostic on purpose.
+  _tennisAllowed(comp = '', evt = '') {
     const t = `${comp} ${evt}`.toLowerCase();
-    
-    // Must contain US Open
-    if (!/\bus\s*open\b/.test(t)) {
-      console.log(`❌ Not US Open tennis: ${comp} - ${evt}`);
-      return false;
-    }
-    
-    // Block women's matches
-    if (this._isWomens(t)) {
-      console.log(`❌ Blocked women's US Open: ${comp} - ${evt}`);
-      return false;
-    }
-    
-    // Block doubles, mixed doubles, juniors, qualifiers
+
+    // Block doubles, juniors, qualifiers, exhibitions, wheelchair, legends
     const blocked = [
       'doubles', 'mixed', 'junior', 'juniors', 'qualifying', 'qualifier',
       'boys', 'girls', 'wheelchair', 'legends', 'exhibition'
     ];
-    
     if (blocked.some(b => t.includes(b))) {
-      console.log(`❌ Blocked non-men's singles US Open: ${comp} - ${evt}`);
+      console.log(`❌ Blocked non-singles tennis: ${comp} - ${evt}`);
       return false;
     }
-    
-    // Additional check: should contain "men" or "mens" or be generic singles
-    const isMensOrGeneric = /\bmen\b|\bmens\b/.test(t) || 
-                           (!(/\bwomen\b|\bwomens\b/.test(t)) && /\bsingles\b/.test(t));
-    
-    if (!isMensOrGeneric && !/\bsingles\b/.test(t)) {
-      // If it doesn't mention singles at all, it might still be valid match odds
-      console.log(`⚠️ Allowing potential US Open men's match (no explicit singles mention): ${comp} - ${evt}`);
-      return true;
-    }
-    
-    if (isMensOrGeneric) {
-      console.log(`✅ Allowing US Open men's singles: ${comp} ${evt}`);
-      return true;
-    }
-    
-    console.log(`❌ Filtered out US Open match: ${comp} - ${evt}`);
-    return false;
+
+    // Otherwise allow - a two-runner tennis market is a singles match.
+    // (We don't require a tournament name, so any tour event passes.)
+    return true;
   }
 
   _fromFor(sportName) {
     if (sportName === 'rugbyleague_nrl') return new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
     if (sportName === 'aussierules_afl') return new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
     if (sportName === 'cricket') return new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
-    if (sportName === 'tennis_us_open') return new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+    if (sportName === 'tennis') return new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
     return new Date().toISOString();
   }
 
@@ -225,7 +200,7 @@ class BetfairExchange {
         cat.forEach(m => {
           console.log(`• COMP: ${m.competition?.name || ''} | EVT: ${m.event?.name || ''} | marketId=${m.marketId}`);
         });
-      } else if (sportName === 'tennis_us_open') {
+      } else if (sportName === 'tennis') {
         console.log('🎾 Raw US Open Tennis catalogue entries:');
         cat.forEach(m => {
           console.log(`• COMP: ${m.competition?.name || ''} | EVT: ${m.event?.name || ''} | marketId=${m.marketId}`);
@@ -244,8 +219,8 @@ class BetfairExchange {
         if (sportName === 'cricket') {
           return this._cricketAllowed(`${comp} ${evt}`);
         }
-        if (sportName === 'tennis_us_open') {
-          return this._usOpenTennisAllowed(comp, evt);
+        if (sportName === 'tennis') {
+          return this._tennisAllowed(comp, evt);
         }
 
         return true;
@@ -328,7 +303,7 @@ class BetfairExchange {
         this.getExchangeOddsForSport('61420', 'aussierules_afl'),
         this.getExchangeOddsForSport('1477',  'rugbyleague_nrl'),
         this.getExchangeOddsForSport('4',     'cricket'),
-        this.getExchangeOddsForSport('2',     'tennis_us_open')
+        this.getExchangeOddsForSport('2',     'tennis')
       ]);
       const all = [...afl, ...nrl, ...cri, ...usOpen];
       console.log(`✅ Total Betfair Exchange odds: ${all.length}`);

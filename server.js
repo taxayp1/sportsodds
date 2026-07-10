@@ -17,7 +17,7 @@ const sportKeyMap = {
   afl:     ['61420', 'aussierules_afl'],
   nrl:     ['1477',  'rugbyleague_nrl'],
   cricket: ['4',     'cricket'],
-  tennis:  ['2',     'us_open_mens_singles'],
+  tennis:  ['2',     'tennis'],
 };
 
 async function fetchExchangeFor(sportParam) {

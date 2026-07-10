@@ -946,6 +946,33 @@ html {
 .match-card {
   -webkit-overflow-scrolling: touch;
 }
+/* ===== Shared sub-filter bar (racing codes + exchange sports) ===== */
+.sub-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0 16px;
+  padding: 0 4px;
+}
+.sub-pill {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid #d0d7de;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  background: #fff;
+  color: #24292f;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.sub-pill:hover { background: #eef4fb; }
+.sub-pill.active {
+  background: #0b5cad;
+  color: #fff;
+  border-color: #0b5cad;
+}
+
 /* ===== Racing tab ===== */
 #racing-filter-bar {
   display: flex;
@@ -1045,8 +1072,8 @@ html {
   .racing-track { font-size: 16px; }
   .racing-odd { padding: 4px 7px; font-size: 12px; gap: 5px; }
   .racing-odd img { height: 19px; width: 42px; object-fit: contain; }
-  .racing-pill { padding: 7px 14px; font-size: 13px; }
-  #racing-filter-bar {
+  .racing-pill, .sub-pill { padding: 7px 14px; font-size: 13px; }
+  #racing-filter-bar, .sub-filter-bar {
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
