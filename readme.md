@@ -2,7 +2,7 @@
 
 ### Australian Sports Betting Odds Comparison Platform
 
-> Live odds comparison across major Australian bookmakers for AFL, NRL, Cricket, Tennis, and UFC — deployed on a self-hosted Kubernetes homelab with a full GitOps CI/CD pipeline.
+> Live odds comparison across major Australian bookmakers for AFL, NRL, Cricket, Tennis, UFC, and Racing — plus Betfair Exchange back/lay markets — deployed on a self-hosted Kubernetes homelab with a full GitOps CI/CD pipeline and in-pipeline image security scanning.
 
 **[sportsodds.taxayp.com](https://sportsodds.taxayp.com)**
 
@@ -12,11 +12,13 @@
 
 SportsOdds fetches and compares betting odds from Australian bookmakers in real time, helping users quickly identify the best available price across multiple platforms without visiting each site individually.
 
-- Compares odds across 10+ AU bookmakers (Sportsbet, TAB, Neds, Ladbrokes, Betfair, Betr, BetRight, PlayUp, PointsBet, Unibet, and more)
-- Highlights best available home and away price per match
-- Covers AFL, NRL, Cricket (T20 + Test), Tennis, UFC/MMA, and Betfair Exchange
-- Updates automatically twice daily via a Kubernetes CronJob
-- Live match detection with countdown timers
+- Compares fixed odds across 21 AU bookmakers (Sportsbet, TAB, Neds, Ladbrokes, Betfair, Betr, BetRight, PlayUp, PointsBet, Unibet, Dabble, TABtouch, and more)
+- Highlights the best available price per match / per runner, with best price flagged green
+- Covers AFL, NRL, Cricket (T20 + Test), Tennis, UFC/MMA, and Racing (Horse, Harness, Greyhound)
+- **Betfair Exchange tab** with per-sport filtering and live back/lay prices + liquidity across every supported sport, including multi-runner racing markets
+- **Racing tab** with a best-odds board sourced from a free racing odds API, filtered to AU-domestic meetings
+- Fixed-odds data refreshed on a schedule via Kubernetes CronJobs; racing refreshed every 5 minutes during racing hours
+- Live match detection with countdown timers, dark/light theme, and a responsive mobile UI
 
 ---
 
@@ -41,7 +43,12 @@ GitLab CI Pipeline
       │     Pushes SHA-tagged image to self-hosted GitLab Container Registry
       │     registry.taxayp.com/taxayp/sportsodds:<commit-sha>
       │
-      └── Stage 2: update-manifests
+      ├── Stage 2: security (Trivy)
+      │     Scans the freshly-built image for OS + dependency CVEs
+      │     Fails the pipeline on fixable CRITICAL vulnerabilities
+      │     Blocks deploy of a vulnerable image before it reaches ArgoCD
+      │
+      └── Stage 3: update-manifests
             Auto-commits updated image tag to GitOps repo
             ArgoCD detects the change
             Rolls out new version to Kubernetes cluster
@@ -55,10 +62,12 @@ The app runs on a 6-node bare-metal Kubernetes homelab:
 | Component | Implementation |
 |---|---|
 | Web server | Kubernetes Deployment (1 replica) |
-| Odds fetching | Kubernetes CronJob (runs 00:00 + 12:00 UTC) |
+| Fixed-odds fetching | Kubernetes CronJob |
+| Racing odds fetching | Kubernetes CronJob (every 5 min, 06:00–23:00 Australia/Brisbane) |
 | Database | CloudNativePG (PostgreSQL operator) with S3 backups |
 | Secrets | HashiCorp Vault + External Secrets Operator |
 | Image builds | Kaniko via self-hosted GitLab CI |
+| Image scanning | Trivy (CVE gate in CI, fails on fixable CRITICAL) |
 | Registry | Self-hosted GitLab Container Registry |
 | GitOps | ArgoCD (automated sync + selfHeal) |
 | Public access | Cloudflare Tunnel (no port forwarding, home IP hidden) |
@@ -71,7 +80,9 @@ The app runs on a 6-node bare-metal Kubernetes homelab:
 
 **Backend:** Node.js · Express · PostgreSQL (via `pg` client)
 
-**Infrastructure:** Kubernetes · ArgoCD · GitLab CI · Kaniko · CloudNativePG · HashiCorp Vault · External Secrets Operator · Longhorn · Cilium · MetalLB · ingress-nginx · Cloudflare Tunnel
+**Data sources:** Betfair Exchange API (back/lay markets) · public racing odds API · fixed-odds bookmaker data
+
+**Infrastructure:** Kubernetes · ArgoCD · GitLab CI · Kaniko · Trivy · CloudNativePG · HashiCorp Vault · External Secrets Operator · Longhorn · Cilium · MetalLB · ingress-nginx · Cloudflare Tunnel
 
 ---
 
@@ -87,8 +98,8 @@ The app runs on a 6-node bare-metal Kubernetes homelab:
                              │
                     ┌────────┴────────┐
                     │                 │
-             Web Server          CronJob
-           (Deployment)      (every 12 hours)
+             Web Server          CronJobs
+           (Deployment)      (odds + racing fetch)
                     │                 │
                     └────────┬────────┘
                              │
