@@ -78,7 +78,7 @@ body {
 /*  Header & Logo Style */
 /* ——————————————— */
 header {
-  background: var(--navy);
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
   color: white;
   padding: 1rem;
   text-align: center;
@@ -434,7 +434,7 @@ td canvas.sparkline {
 
 /* T&C Section Style */
 .terms-section {
-  background: var(--navy);
+  background: var(--navy-900);
   color: white;
   text-align: center;
   padding: 25px 20px;
@@ -648,7 +648,7 @@ td canvas.sparkline {
 
   .terms-section {
     font-size: 0.9rem;
-    background: var(--navy);
+    background: var(--navy-900);
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     border-radius: 0;
