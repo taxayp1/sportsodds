@@ -146,10 +146,11 @@ const timeDisplay = document.createElement('div');
 timeDisplay.className = 'last-updated-header';
 Object.assign(timeDisplay.style, {
   position: 'absolute',
-  top: '1.2rem',
+  top: '3.2rem',
   right: '1.5rem',
   color: 'white',
-  fontSize: '0.9rem',
+  fontSize: '0.85rem',
+  opacity: '0.9',
   transition: 'all 0.3s ease',
 });
 header.appendChild(timeDisplay);
@@ -486,8 +487,10 @@ async function renderOdds(matches) {
 
       const bestHome = Math.max(...rows.map(r => +r.home));
       const bestAway = Math.max(...rows.map(r => +r.away));
+      const bestDraw = drawPresent ? Math.max(...rows.map(r => r.draw ? +r.draw : 0)) : 0;
 
-      // Show bookmaker name when logo fails
+      // Chip design: one row per bookie -> logo + Home/Draw/Away price chips.
+      // Best price in each column highlighted green. Matches racing tiles.
       const inner = rows.map(r => {
         const key = `${teams}-${r.bookie}`;
         const last = lastOddsMap.get(key) || {};
@@ -495,28 +498,28 @@ async function renderOdds(matches) {
         const awayChg = last.away !== undefined && last.away !== r.away;
         lastOddsMap.set(key, { home: r.home, away: r.away });
 
-        // Clean bookmaker name for display
-        const displayName = r.bookie
-          .replace(/_au$/, '')
-          .replace(/_/g, ' ')
-          .replace('betfair_ex_au', 'betfair')
-          .replace('betfair_ex', 'betfair')
-          .toUpperCase();
+        const logoKey = r.bookie.replaceAll('_au','').replaceAll('betfair_ex_au','betfair').replaceAll('betfair_ex','betfair');
+        const betUrl = generateBetLink(r.bookie);
+        const homeBest = +r.home === bestHome;
+        const awayBest = +r.away === bestAway;
+        const drawBest = drawPresent && r.draw && +r.draw === bestDraw;
+
+        const priceChip = (val, isBest, changed) => `
+          <a class="mc-odd ${isBest ? 'best' : ''} ${changed ? 'changed' : ''}" href="${betUrl}" target="_blank" rel="noopener">
+            ${val != null && val !== '' ? (+val).toFixed(2) : '—'}
+          </a>`;
 
         return `
-          <tr>
-            <td style="text-align: center;">
-              <img src="logo/${r.bookie.replaceAll('_au','').replaceAll('betfair_ex_au','betfair').replaceAll('betfair_ex','betfair')}.png" 
-                   class="logo" 
-                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-              <div style="display:none; font-size:0.75em; font-weight:bold; color:#333; margin-top:2px;">${displayName}</div>
-            </td>
-            <td class="${+r.home===bestHome?'highlight':''} ${homeChg?'changed':''}">${r.home}</td>
-            ${drawPresent ? `<td>${r.draw ?? ''}</td>` : ''}
-            <td class="${+r.away===bestAway?'highlight':''} ${awayChg?'changed':''}">${r.away}</td>
-            <td><a href="${generateBetLink(r.bookie)}" target="_blank"><button class="bet-btn">Bet</button></a></td>
-          </tr>
-        `;
+          <div class="mc-row">
+            <a class="mc-logo" href="${betUrl}" target="_blank" rel="noopener" title="${r.bookie}">
+              <img src="logo/${logoKey}.png" alt="${r.bookie}" onerror="this.style.display='none'"/>
+            </a>
+            <div class="mc-prices ${drawPresent ? 'has-draw' : ''}">
+              ${priceChip(r.home, homeBest, homeChg)}
+              ${drawPresent ? priceChip(r.draw, drawBest, false) : ''}
+              ${priceChip(r.away, awayBest, awayChg)}
+            </div>
+          </div>`;
       }).join('');
 
       // Match status display
@@ -571,16 +574,13 @@ async function renderOdds(matches) {
         <h3>${teams}</h3>
         <div class="start-time ${statusClass}">${timeDisplay}</div>
         <div class="sport-tag">${match.sport || 'Unknown'}</div>
-        <table>
-          <tr>
-            <th>Bookmaker</th>
-            <th>Home</th>
-            ${drawPresent ? '<th>Draw</th>' : ''}
-            <th>Away</th>
-            <th>Bet</th>
-          </tr>
-          ${inner}
-        </table>
+        <div class="mc-colhead ${drawPresent ? 'has-draw' : ''}">
+          <span class="mc-colhead-logo"></span>
+          <span>Home</span>
+          ${drawPresent ? '<span>Draw</span>' : ''}
+          <span>Away</span>
+        </div>
+        <div class="mc-list">${inner}</div>
       `;
 
       container.appendChild(card);
@@ -729,55 +729,39 @@ function renderExchange(list) {
         ? m.competition.trim()
         : (m.sport || 'exchange').toUpperCase();
 
+      const exCell = (price, size, kind) => `
+        <div class="exc-cell exc-${kind}">
+          <span class="exc-price">${price != null ? (+price).toFixed(2) : '—'}</span>
+          ${size ? `<span class="exc-size">${fmtSize(size)}</span>` : ''}
+        </div>`;
+
       card.innerHTML = `
         ${liveIndicator}
         <h3>${teams}</h3>
         <div class="start-time ${statusClass}">${timeText}</div>
         <div class="sport-tag">${sportLabel}</div>
-        <table>
-          <tr>
-            <th>Book</th>
-            <th>Home Back</th>
-            <th>Home Lay</th>
-            <th>Away Back</th>
-            <th>Away Lay</th>
-            <th>Bet</th>
-          </tr>
-          <tr>
-            <td style="text-align:center;">
-              <img src="logo/betfair.png" class="logo"
-                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-              <div style="display:none; font-size:0.75em; font-weight:bold; color:#333; margin-top:2px;">BETFAIR</div>
-            </td>
-
-            <td class="back-odds">
-              ${m.home_back != null ? `<div class="ex-price">${m.home_back}</div>` : ''}
-              ${m.home_back_size ? `<div class="ex-size">${fmtSize(m.home_back_size)}</div>` : ''}
-            </td>
-            <td class="lay-odds">
-              ${m.home_lay != null ? `<div class="ex-price">${m.home_lay}</div>` : ''}
-              ${m.home_lay_size ? `<div class="ex-size">${fmtSize(m.home_lay_size)}</div>` : ''}
-            </td>
-            <td class="back-odds">
-              ${m.away_back != null ? `<div class="ex-price">${m.away_back}</div>` : ''}
-              ${m.away_back_size ? `<div class="ex-size">${fmtSize(m.away_back_size)}</div>` : ''}
-            </td>
-            <td class="lay-odds">
-              ${m.away_lay != null ? `<div class="ex-price">${m.away_lay}</div>` : ''}
-              ${m.away_lay_size ? `<div class="ex-size">${fmtSize(m.away_lay_size)}</div>` : ''}
-            </td>
-
-            <td>
-              <a href="https://www.betfair.com.au" target="_blank">
-                <button class="bet-btn">Bet</button>
-              </a>
-            </td>
-          </tr>
-          <div class="ex-matched">
-    Matched: <strong>AUD ${ (m.total_matched ?? 0).toLocaleString('en-AU', { maximumFractionDigits: 0 }) }</strong>
-  </div>
-
-        </table>
+        <div class="exc-matched-row">Matched <strong>AUD ${(m.total_matched ?? 0).toLocaleString('en-AU', { maximumFractionDigits: 0 })}</strong></div>
+        <div class="exc-grid">
+          <div class="exc-side">
+            <div class="exc-team">${m.home_team || 'Home'}</div>
+            <div class="exc-pair">
+              ${exCell(m.home_back, m.home_back_size, 'back')}
+              ${exCell(m.home_lay, m.home_lay_size, 'lay')}
+            </div>
+            <div class="exc-labels"><span>Back</span><span>Lay</span></div>
+          </div>
+          <div class="exc-side">
+            <div class="exc-team">${m.away_team || 'Away'}</div>
+            <div class="exc-pair">
+              ${exCell(m.away_back, m.away_back_size, 'back')}
+              ${exCell(m.away_lay, m.away_lay_size, 'lay')}
+            </div>
+            <div class="exc-labels"><span>Back</span><span>Lay</span></div>
+          </div>
+        </div>
+        <a class="exc-betfair-link" href="https://www.betfair.com.au" target="_blank" rel="noopener">
+          <img src="logo/betfair.png" alt="Betfair" onerror="this.style.display='none'"/> Bet on Betfair
+        </a>
       `;
       
       container.appendChild(card);
@@ -1087,7 +1071,7 @@ async function loadRacing(code = 'all') {
     renderRacing(lastRacingPayload);
     if (payload.dataAsOf) {
       const asOf = new Date(payload.dataAsOf).toLocaleString('en-AU', { timeStyle: 'short' });
-      timeDisplay.textContent = `Odds as of: ${asOf}`;
+      timeDisplay.textContent = `Updated: ${asOf}`;
     }
   } catch (err) {
     console.error('Error loading racing:', err);

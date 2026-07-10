@@ -283,6 +283,7 @@ th, td {
   text-align: center;
   padding: 8px 6px;
   vertical-align: middle;
+  color: var(--ink);
 }
 
 th:first-child,
@@ -292,9 +293,9 @@ td:first-child {
 }
 
 th {
-  background: #f8f9fa;
+  background: var(--surface-2);
   font-weight: 600;
-  color: #333;
+  color: var(--ink-soft);
   font-size: 0.8em;
 }
 
@@ -308,9 +309,8 @@ th {
 
 .highlight {
   font-weight: bold;
-  color: green;
-  background: #d4edda;
-  color: #155724;
+  background: var(--best-bg);
+  color: var(--best);
 }
 
 .modal {
@@ -821,17 +821,17 @@ th, td { overflow: hidden; text-overflow: ellipsis; }
   margin-top: 6px;
   text-align: right;   /* keeps layout tidy on mobile */
 }
-.ex-matched strong { color: #222; }
+.ex-matched strong { color: var(--ink); }
 /* Always-visible responsible gambling banner */
 .rg-banner{
-  background:#04366b;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
   color:#fff;
   text-align:center;
   padding:14px 12px;
   font-size:.92rem;
   line-height:1.45;
 }
-.rg-banner a{ color:#ffdd57; font-weight:600; }
+.rg-banner a{ color: var(--gold); font-weight:600; }
 .rg-banner .rg-18{
   width:36px; height:36px; margin-left:8px; vertical-align:middle;
 }
@@ -1222,4 +1222,139 @@ html {
 .sport-tag {
   background: var(--navy-700);
   color: #fff;
+}
+
+/* ===== Sports/Exchange chip design (matches racing tiles) ===== */
+.mc-colhead {
+  display: grid;
+  grid-template-columns: 56px 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0 6px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.mc-colhead.has-draw { grid-template-columns: 56px 1fr 1fr 1fr; }
+.mc-colhead span:first-child { text-align: left; }
+
+.mc-list { display: flex; flex-direction: column; }
+.mc-row {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+.mc-row:first-child { border-top: none; }
+
+.mc-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+}
+.mc-logo img { width: 50px; height: 24px; object-fit: contain; }
+
+.mc-prices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.mc-prices.has-draw { grid-template-columns: 1fr 1fr 1fr; }
+
+.mc-odd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 4px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background .12s ease, transform .12s ease, border-color .12s ease;
+}
+.mc-odd:hover {
+  background: var(--back-bg);
+  transform: translateY(-1px);
+  border-color: var(--navy-700);
+}
+.mc-odd.best {
+  background: var(--best-bg);
+  color: var(--best);
+  border-color: var(--best);
+}
+.mc-odd.changed { animation: mc-flash 1.2s ease-out; }
+@keyframes mc-flash {
+  0% { background: var(--gold-soft); }
+  100% { background: var(--surface-2); }
+}
+
+@media (max-width: 640px) {
+  .mc-colhead, .mc-row { grid-template-columns: 46px 1fr; }
+  .mc-colhead { grid-template-columns: 46px 1fr 1fr; }
+  .mc-colhead.has-draw { grid-template-columns: 46px 1fr 1fr 1fr; }
+  .mc-logo img { width: 42px; height: 20px; }
+  .mc-odd { padding: 6px 3px; font-size: 13px; }
+}
+
+/* ===== Exchange H2H chip design ===== */
+.exc-matched-row { font-size: 12px; color: var(--ink-soft); margin: 2px 0 10px; }
+.exc-matched-row strong { color: var(--ink); }
+.exc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.exc-side {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+}
+.exc-team {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+.exc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.exc-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 2px;
+  border-radius: 8px;
+}
+.exc-back { background: var(--back-bg); }
+.exc-lay  { background: var(--lay-bg); }
+.exc-price { font-weight: 800; font-size: 15px; color: var(--ink); }
+.exc-size  { font-size: 10px; color: var(--ink-soft); }
+.exc-labels {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin-top: 4px; font-size: 10px; text-transform: uppercase;
+  color: var(--ink-soft); text-align: center; font-weight: 600;
+}
+.exc-betfair-link {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 12px; padding: 9px;
+  background: var(--navy); color: #fff;
+  border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;
+  transition: background .15s ease;
+}
+.exc-betfair-link:hover { background: var(--navy-700); }
+.exc-betfair-link img { height: 18px; width: auto; background: #fff; border-radius: 3px; padding: 1px 3px; }
+
+@media (max-width: 640px) {
+  .exc-grid { gap: 8px; }
+  .exc-side { padding: 8px; }
+  .exc-price { font-size: 14px; }
 }
