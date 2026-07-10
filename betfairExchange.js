@@ -422,7 +422,7 @@ class BetfairExchange {
         this.getExchangeOddsForSport('1477',  'rugbyleague_nrl'),
         this.getExchangeOddsForSport('4',     'cricket'),
         this.getExchangeOddsForSport('2',     'tennis'),
-        this.getExchangeOddsForSport('26420', 'ufc')
+        this.getExchangeOddsForSport('26420387', 'ufc')
       ]);
       const all = [...afl, ...nrl, ...cri, ...tennis, ...ufc];
       console.log(`✅ Total Betfair Exchange odds: ${all.length}`);

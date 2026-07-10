@@ -18,7 +18,7 @@ const sportKeyMap = {
   nrl:     ['1477',  'rugbyleague_nrl'],
   cricket: ['4',     'cricket'],
   tennis:  ['2',     'tennis'],
-  ufc:     ['26420', 'ufc'],
+  ufc:     ['26420387', 'ufc'],
 };
 
 async function fetchExchangeFor(sportParam) {
