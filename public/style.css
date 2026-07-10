@@ -59,6 +59,11 @@
   --shadow-md:   0 4px 14px rgba(0,0,0,.45);
 }
 
+html {
+  margin: 0;
+  padding: 0;
+  background: var(--navy-900);   /* matches header/footer so no white strap shows at scroll ends */
+}
 body {
   margin: 0;
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -67,6 +72,7 @@ body {
   scroll-behavior: smooth;
   transition: background .25s ease, color .25s ease;
 }
+.mobile-scroll-wrapper { background: var(--bg); }
 
 /* ——————————————— */
 /*  Header & Logo Style */
@@ -428,7 +434,7 @@ td canvas.sparkline {
 
 /* T&C Section Style */
 .terms-section {
-  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
+  background: var(--navy-900);
   color: white;
   text-align: center;
   padding: 25px 20px;
@@ -642,7 +648,7 @@ td canvas.sparkline {
 
   .terms-section {
     font-size: 0.9rem;
-    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
+    background: var(--navy-900);
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     border-radius: 0;
@@ -763,6 +769,15 @@ th, td { overflow: hidden; text-overflow: ellipsis; }
   header { 
     padding: 10px 12px 12px;
     text-align: center;
+    border-radius: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .rg-banner, .terms-section {
+    border-radius: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
   }
 
   /* slightly smaller brand on mobile */
@@ -822,7 +837,7 @@ th, td { overflow: hidden; text-overflow: ellipsis; }
 .ex-matched strong { color: var(--ink); }
 /* Always-visible responsible gambling banner */
 .rg-banner{
-  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
+  background: var(--navy-900);
   color:#fff;
   text-align:center;
   padding:14px 12px;
