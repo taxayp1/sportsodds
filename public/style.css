@@ -230,7 +230,7 @@ nav button {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: #ff4444;
+  background: var(--live);
   color: white;
   padding: 3px 8px;
   border-radius: 12px;
@@ -242,26 +242,25 @@ nav button {
 
 /* Live match styling */
 .match-card.live-match {
-  border: 2px solid #ff4444;
-  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
-  background: var(--surface);
+  border-left-color: var(--live);          /* red accent bar when live */
+  box-shadow: 0 4px 14px rgba(229, 72, 77, 0.22);
+  background: var(--card-bg, var(--surface));
 }
 
 .match-card.upcoming-match {
-  border: 2px solid #ff9800;
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
-  background: var(--surface);
+  border-left-color: var(--gold);          /* gold accent bar (racing feel) */
+  background: var(--card-bg, var(--surface));
 }
 
 /* Status text styling */
 .start-time.live-match {
-  color: #ff4444;
+  color: var(--live);
   font-weight: bold;
   font-size: 1rem;
 }
 
 .start-time.upcoming-match {
-  color: #ff9800;
+  color: var(--accent);
   font-weight: bold;
   font-size: 0.95rem;
 }
@@ -643,7 +642,7 @@ td canvas.sparkline {
 
   .terms-section {
     font-size: 0.9rem;
-    background: #04366b;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     border-radius: 0;
@@ -662,11 +661,6 @@ td canvas.sparkline {
     padding: 2px 6px;
   }
 
-  .match-card.live-match,
-  .match-card.upcoming-match {
-    border-width: 1px;
-  }
-  
   .start-time.live-match,
   .start-time.upcoming-match {
     font-size: 0.9rem;
@@ -1322,6 +1316,7 @@ html {
   padding: 10px;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
 }
 .exc-team {
   font-weight: 700;
