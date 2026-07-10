@@ -138,6 +138,18 @@ class BetfairExchange {
   // General tennis singles filter (any tournament - Wimbledon, US Open, etc).
   // Keeps real head-to-head singles matches; drops doubles/juniors/qualifiers
   // and other non-match markets. Tournament-agnostic on purpose.
+  // MMA/UFC: keep real fighter-vs-fighter match odds. Betfair MMA markets are
+  // 2-runner (fighter A vs B). We don't need method/round prop markets, but the
+  // catalogue filter below is by market name via marketProjection; here we just
+  // drop obvious non-match entries by runner sanity (handled by _badRunner).
+  _mmaAllowed(comp = '', evt = '') {
+    const t = `${comp} ${evt}`.toLowerCase();
+    // drop clearly non-fight markets if they slip in
+    const blocked = ['total rounds', 'method of', 'go the distance', 'round betting'];
+    if (blocked.some(b => t.includes(b))) return false;
+    return true;
+  }
+
   _tennisAllowed(comp = '', evt = '') {
     const t = `${comp} ${evt}`.toLowerCase();
 
@@ -161,6 +173,7 @@ class BetfairExchange {
     if (sportName === 'aussierules_afl') return new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
     if (sportName === 'cricket') return new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
     if (sportName === 'tennis') return new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+    if (sportName === 'ufc') return new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
     return new Date().toISOString();
   }
 
@@ -222,6 +235,9 @@ class BetfairExchange {
         if (sportName === 'tennis') {
           return this._tennisAllowed(comp, evt);
         }
+        if (sportName === 'ufc') {
+          return this._mmaAllowed(comp, evt);
+        }
 
         return true;
       });
@@ -237,6 +253,7 @@ class BetfairExchange {
 
         meta.set(m.marketId, {
           match: m.event?.name || '',
+          competition: m.competition?.name || '',
           openDate: m.event?.openDate,
           home: r0n,
           away: r1n
@@ -271,6 +288,7 @@ class BetfairExchange {
 
         out.push({
           match: info.match,
+          competition: info.competition,
           home_team: info.home,
           away_team: info.away,
           home_back: r0b.price ?? null,
@@ -296,16 +314,117 @@ class BetfairExchange {
     }
   }
 
+  // ---- Racing exchange (multi-runner WIN markets) ----------------------
+  // Structurally different from the 2-runner sports above: each race is one
+  // market with many runners (horses/dogs). Returns race objects, each with a
+  // runners[] carrying back/lay/liquidity - a different shape than the H2H rows.
+  // eventTypeId: horse racing = 7, greyhound = 4339.
+  async getRacingExchangeOdds(eventTypeId, codeName) {
+    try {
+      console.log(`🐎 Fetching ${codeName} racing exchange (multi-runner)…`);
+      const from = new Date(Date.now() - 10 * 60 * 1000).toISOString();      // 10 min grace
+      const to   = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();  // next 8h
+
+      // WIN markets only, AU only (marketCountries: AU), upcoming.
+      const cat = await this.makeRequest('listMarketCatalogue', {
+        filter: {
+          eventTypeIds: [eventTypeId],
+          marketCountries: ['AU'],
+          marketTypeCodes: ['WIN'],
+          marketStartTime: { from, to }
+        },
+        marketProjection: ['EVENT','RUNNER_DESCRIPTION','MARKET_START_TIME'],
+        sort: 'FIRST_TO_START',
+        maxResults: 200
+      });
+      if (!cat?.length) { console.log(`🐎 ${codeName}: no AU win markets`); return []; }
+
+      // meta per market: runner selectionId -> name, plus event/venue/time
+      const meta = new Map();
+      for (const m of cat) {
+        const runners = {};
+        (m.runners || []).forEach(r => {
+          runners[r.selectionId] = { name: r.runnerName, sortPriority: r.sortPriority };
+        });
+        meta.set(m.marketId, {
+          venue: m.event?.venue || m.event?.name || '',
+          marketName: m.marketName || '',           // e.g. "R5 1200m"
+          startTime: m.marketStartTime,
+          runners
+        });
+      }
+
+      const ids = Array.from(meta.keys());
+      const chunk = (arr, n) => arr.reduce((a,_,i)=> (i % n ? a : [...a, arr.slice(i, i+n)]), []);
+      const books = [];
+      for (const c of chunk(ids, 40)) {
+        const res = await this.makeRequest('listMarketBook', {
+          marketIds: c,
+          priceProjection: { priceData: ['EX_BEST_OFFERS'] }
+        });
+        if (res?.length) books.push(...res);
+      }
+
+      const out = [];
+      for (const b of books) {
+        const info = meta.get(b.marketId);
+        if (!info) continue;
+        const runners = (b.runners || [])
+          .filter(r => r.status === 'ACTIVE')
+          .map(r => {
+            const back = r.ex?.availableToBack?.[0] || {};
+            const lay  = r.ex?.availableToLay?.[0]  || {};
+            const rm = info.runners[r.selectionId] || {};
+            return {
+              name: rm.name || `#${r.selectionId}`,
+              sort: rm.sortPriority ?? 999,
+              back: back.price ?? null,
+              back_size: back.size ?? null,
+              lay: lay.price ?? null,
+              lay_size: lay.size ?? null,
+              last_traded: r.lastPriceTraded ?? null
+            };
+          })
+          .sort((a, z) => a.sort - z.sort);
+        if (!runners.length) continue;
+
+        out.push({
+          venue: info.venue,
+          market_name: info.marketName,
+          start_time: info.startTime,
+          code: codeName,           // 'horse' | 'greyhound'
+          total_matched: b.totalMatched ?? 0,
+          runners
+        });
+      }
+      out.sort((a, z) => new Date(a.start_time) - new Date(z.start_time));
+      console.log(`✅ ${codeName} racing exchange: ${out.length} races`);
+      return out;
+    } catch (err) {
+      console.error(`❌ Racing exchange (${codeName}) error:`, err.message);
+      return [];
+    }
+  }
+
+  async getAllRacingExchange() {
+    const [horse, greyhound] = await Promise.all([
+      this.getRacingExchangeOdds('7',    'horse'),
+      this.getRacingExchangeOdds('4339', 'greyhound')
+    ]);
+    return { horse, greyhound };
+  }
+
   async getAllExchangeOdds() {
     try {
       console.log('💱 Fetching all Betfair Exchange odds (batched)…');
-      const [afl, nrl, cri, usOpen] = await Promise.all([
+      const [afl, nrl, cri, tennis, ufc] = await Promise.all([
         this.getExchangeOddsForSport('61420', 'aussierules_afl'),
         this.getExchangeOddsForSport('1477',  'rugbyleague_nrl'),
         this.getExchangeOddsForSport('4',     'cricket'),
-        this.getExchangeOddsForSport('2',     'tennis')
+        this.getExchangeOddsForSport('2',     'tennis'),
+        this.getExchangeOddsForSport('26420', 'ufc')
       ]);
-      const all = [...afl, ...nrl, ...cri, ...usOpen];
+      const all = [...afl, ...nrl, ...cri, ...tennis, ...ufc];
       console.log(`✅ Total Betfair Exchange odds: ${all.length}`);
       return all;
     } catch (e) {

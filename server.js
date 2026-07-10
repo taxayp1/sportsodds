@@ -18,6 +18,7 @@ const sportKeyMap = {
   nrl:     ['1477',  'rugbyleague_nrl'],
   cricket: ['4',     'cricket'],
   tennis:  ['2',     'tennis'],
+  ufc:     ['26420', 'ufc'],
 };
 
 async function fetchExchangeFor(sportParam) {
@@ -53,7 +54,8 @@ const exchangeCache = {
   afl: { ts: 0, data: [] },
   nrl: { ts: 0, data: [] },
   cricket: { ts: 0, data: [] },
-  tennis: { ts: 0, data: [] }
+  tennis: { ts: 0, data: [] },
+  ufc: { ts: 0, data: [] }
 };
 function filterExchangeBySport(arr, sport) {
   if (!sport) return arr;
@@ -500,6 +502,25 @@ app.get('/odds-db/exchange', async (req, res) => {
   } catch (e) {
     console.error('âŒ EXCHANGE alias error:', e.message);
     res.status(500).json({ error: 'Failed to load exchange odds' });
+  }
+});
+
+// ---------- Racing exchange (multi-runner Betfair win markets) ----------
+let racingExchangeCache = { ts: 0, data: { horse: [], greyhound: [] } };
+app.get('/odds-exchange/racing', async (req, res) => {
+  try {
+    const now = Date.now();
+    // 110s cache like the sports exchange
+    if (racingExchangeCache.data && (now - racingExchangeCache.ts < 110 * 1000)
+        && (racingExchangeCache.data.horse.length || racingExchangeCache.data.greyhound.length)) {
+      return res.json(racingExchangeCache.data);
+    }
+    const data = await betfair.getAllRacingExchange();
+    racingExchangeCache = { ts: now, data };
+    res.json(data);
+  } catch (e) {
+    console.error('❌ Racing exchange route error:', e.message);
+    res.status(500).json({ error: 'Failed to load racing exchange odds' });
   }
 });
 

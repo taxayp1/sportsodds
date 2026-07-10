@@ -68,6 +68,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
   debouncedSearch(() => {
     requestAnimationFrame(() => {
       if (activeSport === 'racing') { renderRacing(lastRacingPayload); }
+      else if (activeSport === 'exchange' && lastExchangeSport === 'racing') { loadExchange('racing'); }
       else if (activeSport === 'exchange') { renderExchange(lastExchangeList); }
       else { renderOdds(allMatches); }
       
@@ -607,17 +608,32 @@ async function loadExchange(subSport = 'all') {
   activeSport = 'exchange';
   lastExchangeSport = subSport;
 
-  // sub-sport pills (backend supports afl/nrl/cricket/tennis; 'all' = everything)
+  // sub-sport pills. afl/nrl/cricket/tennis/ufc = H2H; racing = multi-runner.
   const bar = ensureExchangeFilterBar();
-  const pills = [['all','All'],['afl','AFL'],['nrl','NRL'],['cricket','Cricket'],['tennis','Tennis']];
+  const pills = [['all','All'],['afl','AFL'],['nrl','NRL'],['cricket','Cricket'],
+                 ['tennis','Tennis'],['ufc','UFC'],['racing','Racing']];
   bar.innerHTML = pills.map(([v,label]) => {
     const on = (lastExchangeSport === v);
     return `<button class="sub-pill ${on ? 'active' : ''}" onclick="loadExchange('${v}')">${label}</button>`;
   }).join('');
 
-  // Use smooth loading state
   showLoadingState();
-  
+
+  // Racing exchange uses a different endpoint + multi-runner card.
+  if (subSport === 'racing') {
+    try {
+      const res = await fetch(`/odds-exchange/racing?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      renderRacingExchange(data);
+      timeDisplay.textContent = `Updated: ${new Date().toLocaleString('en-AU', { timeStyle: 'short' })}`;
+    } catch (err) {
+      console.error('Error loading racing exchange:', err);
+      container.innerHTML = `<p style="padding:20px;">Error loading racing exchange: ${err.message}.</p>`;
+    }
+    return;
+  }
+
   try {
     const q = (subSport && subSport !== 'all') ? `?sport=${encodeURIComponent(subSport)}` : '';
     const url = `/odds-exchange${q}${q ? '&' : '?'}t=${Date.now()}`;
@@ -707,7 +723,11 @@ function renderExchange(list) {
       card.style.transform = 'translateY(30px) scale(0.95)';
       
       const timeText = timeDisplay;
-      const sportLabel = (m.sport || 'exchange').toUpperCase();
+      // Prefer the competition/tournament name (e.g. "Wimbledon", "ICC T20 WC",
+      // "The Ashes Test") over the generic sport code. Falls back to sport.
+      const sportLabel = (m.competition && m.competition.trim())
+        ? m.competition.trim()
+        : (m.sport || 'exchange').toUpperCase();
 
       card.innerHTML = `
         ${liveIndicator}
@@ -770,6 +790,67 @@ function renderExchange(list) {
       });
     });
   }, existingCards.length > 0 ? 200 : 0);
+}
+
+// ===== Racing Exchange (multi-runner Betfair win markets) =====
+function racingExchStartLabel(iso) {
+  const t = new Date(iso).getTime();
+  if (!isFinite(t)) return '';
+  const mins = Math.round((t - Date.now()) / 60000);
+  const hhmm = new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+  if (mins <= 0) return `Jumped · ${hhmm}`;
+  if (mins < 60) return `${mins}m · ${hhmm}`;
+  return `${Math.floor(mins/60)}h ${mins%60}m · ${hhmm}`;
+}
+
+function renderRacingExchange(data) {
+  const dropdown = document.getElementById('bookmakerFilter');
+  if (dropdown) dropdown.style.display = 'none';
+
+  const horse = (data && Array.isArray(data.horse)) ? data.horse : [];
+  const grey  = (data && Array.isArray(data.greyhound)) ? data.greyhound : [];
+  let races = [...horse, ...grey].sort((a,b) => new Date(a.start_time) - new Date(b.start_time));
+
+  const term = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+  if (term) races = races.filter(r => `${r.venue} ${r.market_name}`.toLowerCase().includes(term));
+
+  if (!races.length) {
+    container.innerHTML = `<p style="padding:20px;grid-column:1/-1;">No AU racing exchange markets right now.</p>`;
+    return;
+  }
+
+  const icon = c => c === 'greyhound' ? '🐕' : '🐎';
+  const codeLabel = c => c === 'greyhound' ? 'Greyhound' : 'Horse';
+  const fmtSize = v => (v != null && !Number.isNaN(v)) ? '$' + Math.round(Number(v)).toLocaleString('en-AU') : '';
+
+  container.innerHTML = races.map(race => {
+    const rows = race.runners.map(rn => `
+      <div class="rex-runner">
+        <span class="rex-name">${rn.name}</span>
+        <span class="rex-cell rex-back" title="Back liquidity ${fmtSize(rn.back_size)}">${rn.back != null ? (+rn.back).toFixed(2) : '—'}</span>
+        <span class="rex-cell rex-lay" title="Lay liquidity ${fmtSize(rn.lay_size)}">${rn.lay != null ? (+rn.lay).toFixed(2) : '—'}</span>
+      </div>`).join('');
+
+    return `
+      <div class="odds-card racing-card card-entrance">
+        <div class="racing-card-head">
+          <div class="racing-card-title">
+            <div class="racing-track">${race.venue}</div>
+            <div class="racing-racename">${race.market_name || ''} · Matched ${fmtSize(race.total_matched)}</div>
+          </div>
+          <div class="racing-card-meta">
+            <span class="racing-tag">${icon(race.code)} ${codeLabel(race.code)} · Exchange</span>
+            <div class="racing-start">${racingExchStartLabel(race.start_time)}</div>
+          </div>
+        </div>
+        <div class="rex-header">
+          <span class="rex-name">Runner</span>
+          <span class="rex-cell">Back</span>
+          <span class="rex-cell">Lay</span>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
 }
 
 function generateBetLink(bookmaker) {

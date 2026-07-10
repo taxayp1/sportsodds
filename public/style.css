@@ -1079,3 +1079,36 @@ html {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ===== Racing Exchange (multi-runner back/lay) ===== */
+.rex-header, .rex-runner {
+  display: grid;
+  grid-template-columns: 1fr 70px 70px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+}
+.rex-header {
+  border-bottom: 2px solid #eaeef2;
+  font-size: 12px;
+  font-weight: 700;
+  color: #57606a;
+  text-transform: uppercase;
+}
+.rex-runner { border-top: 1px solid #f0f3f6; }
+.rex-name { font-weight: 600; font-size: 14px; }
+.rex-cell {
+  text-align: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.rex-back { background: #d6e4f5; }  /* blue = back, matches exchange convention */
+.rex-lay  { background: #f7d9e3; }  /* pink = lay */
+
+@media (max-width: 640px) {
+  .rex-header, .rex-runner { grid-template-columns: 1fr 56px 56px; gap: 5px; }
+  .rex-name { font-size: 13px; }
+  .rex-cell { font-size: 12px; padding: 3px 4px; }
+}
