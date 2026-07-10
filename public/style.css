@@ -1,16 +1,76 @@
+/* ============================================================
+   Design tokens - single source of truth for color + type.
+   Dark mode overrides the same variables under [data-theme="dark"].
+   ============================================================ */
+:root {
+  /* brand */
+  --navy:        #003366;
+  --navy-900:    #01243f;
+  --navy-700:    #0b5cad;
+  --gold:        #ffcc00;
+  --gold-soft:   #ffe57a;
+
+  /* surfaces + text */
+  --bg:          #eef1f6;
+  --surface:     #ffffff;
+  --surface-2:   #f6f8fb;
+  --ink:         #1a2332;
+  --ink-soft:    #5a6472;
+  --border:      #e2e7ee;
+
+  /* semantic (odds) */
+  --best:        #1a7f4b;
+  --best-bg:     #d7f5dd;
+  --back-bg:     #d6e4f5;
+  --lay-bg:      #f7d9e3;
+  --live:        #e5484d;
+  --accent:      #ff8c00;
+
+  /* effects */
+  --shadow-sm:   0 1px 2px rgba(16,32,54,.06), 0 1px 3px rgba(16,32,54,.08);
+  --shadow-md:   0 4px 12px rgba(16,32,54,.08), 0 2px 4px rgba(16,32,54,.06);
+  --radius:      14px;
+}
+
+[data-theme="dark"] {
+  --navy:        #0b1a2d;
+  --navy-900:    #050f1c;
+  --navy-700:    #1f6fc0;
+  --gold:        #ffd23f;
+  --gold-soft:   #b98f16;
+
+  --bg:          #0d1520;
+  --surface:     #161f2e;
+  --surface-2:   #1d2838;
+  --ink:         #e8edf3;
+  --ink-soft:    #9aa7b8;
+  --border:      #2a3547;
+
+  --best:        #3fd07f;
+  --best-bg:     #16351f;
+  --back-bg:     #16304a;
+  --lay-bg:      #3a1622;
+  --live:        #ff5c60;
+  --accent:      #ff9f3a;
+
+  --shadow-sm:   0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:   0 4px 14px rgba(0,0,0,.45);
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  color: #222;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
   scroll-behavior: smooth;
+  transition: background .25s ease, color .25s ease;
 }
 
 /* ——————————————— */
 /*  Header & Logo Style */
 /* ——————————————— */
 header {
-  background: #003366;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-900) 100%);
   color: white;
   padding: 1rem;
   text-align: center;
@@ -137,20 +197,30 @@ nav button {
 }
 
 .match-card {
-  background: white;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1rem 1rem 1rem 1.15rem;
+  box-shadow: var(--shadow-md);
   overflow: visible;
   position: relative;
   min-width: 350px;
-  margin-bottom: 0; /* Remove margin since we're using grid gap */
+  margin-bottom: 0;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);   /* signature accent bar */
+  transition: transform .15s ease, box-shadow .15s ease, background .25s ease;
+}
+.match-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(16,32,54,.12);
 }
 
 .match-card h3 {
   margin-top: 0;
-  font-size: 1.1em;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.12em;
   line-height: 1.3;
+  color: var(--ink);
 }
 
 /* Live indicator in corner */
@@ -957,20 +1027,20 @@ html {
 .sub-pill {
   padding: 8px 18px;
   border-radius: 20px;
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--border);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  background: #fff;
-  color: #24292f;
+  background: var(--surface);
+  color: var(--ink);
   white-space: nowrap;
   transition: all .15s ease;
 }
-.sub-pill:hover { background: #eef4fb; }
+.sub-pill:hover { background: var(--surface-2); }
 .sub-pill.active {
-  background: #0b5cad;
+  background: var(--navy-700);
   color: #fff;
-  border-color: #0b5cad;
+  border-color: var(--navy-700);
 }
 
 /* ===== Racing tab ===== */
@@ -984,27 +1054,29 @@ html {
 .racing-pill {
   padding: 8px 18px;
   border-radius: 20px;
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--border);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  background: #fff;
-  color: #24292f;
+  background: var(--surface);
+  color: var(--ink);
   white-space: nowrap;
   transition: all .15s ease;
 }
-.racing-pill:hover { background: #eef4fb; }
+.racing-pill:hover { background: var(--surface-2); }
 .racing-pill.active {
-  background: #0b5cad;
+  background: var(--navy-700);
   color: #fff;
-  border-color: #0b5cad;
+  border-color: var(--navy-700);
 }
 
 .racing-card {
-  border: 2px solid #ff8c00;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
   padding: 16px;
-  background: #fff;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
 }
 .racing-card-head {
   display: flex;
@@ -1014,8 +1086,8 @@ html {
   gap: 8px;
   margin-bottom: 6px;
 }
-.racing-track { font-size: 18px; font-weight: 800; }
-.racing-racename { color: #57606a; font-size: 13px; }
+.racing-track { font-size: 18px; font-weight: 800; font-family: 'Montserrat', sans-serif; color: var(--ink); }
+.racing-racename { color: var(--ink-soft); font-size: 13px; }
 .racing-card-meta { text-align: right; }
 .racing-tag {
   display: inline-block;
@@ -1027,7 +1099,7 @@ html {
   font-weight: 700;
   white-space: nowrap;
 }
-.racing-start { color: #ff8c00; font-weight: 700; margin-top: 4px; font-size: 14px; }
+.racing-start { color: var(--accent); font-weight: 700; margin-top: 4px; font-size: 14px; }
 
 .racing-runner { padding: 8px 0; border-top: 1px solid #eaeef2; }
 .racing-runner-head {
@@ -1038,7 +1110,7 @@ html {
   flex-wrap: wrap;
 }
 .racing-runner-name { font-weight: 600; }
-.racing-best { color: #0b7a2f; font-weight: 700; font-size: 13px; }
+.racing-best { color: var(--best); font-weight: 700; font-size: 13px; }
 
 .racing-odds-row {
   display: flex;
@@ -1051,7 +1123,7 @@ html {
   gap: 6px;
   padding: 5px 9px;
   border-radius: 6px;
-  background: #f6f8fa;
+  background: var(--surface-2);
   font-size: 13px;
   white-space: nowrap;
   text-decoration: none;
@@ -1059,9 +1131,9 @@ html {
   cursor: pointer;
   transition: background .12s ease, transform .12s ease;
 }
-.racing-odd:hover { background: #e6edf5; transform: translateY(-1px); }
+.racing-odd:hover { background: var(--back-bg); transform: translateY(-1px); }
 .racing-odd img { height: 22px; width: 48px; object-fit: contain; object-position: center; flex: 0 0 auto; }
-.racing-odd.best { background: #d7f5dd; font-weight: 700; }
+.racing-odd.best { background: var(--best-bg); font-weight: 700; color: var(--best); }
 .racing-odd.best:hover { background: #c3eecd; }
 
 /* Mobile: single column, tighter odds chips, wrap the meta under the title */
@@ -1104,11 +1176,50 @@ html {
   font-weight: 700;
   font-size: 13px;
 }
-.rex-back { background: #d6e4f5; }  /* blue = back, matches exchange convention */
-.rex-lay  { background: #f7d9e3; }  /* pink = lay */
+.rex-back { background: var(--back-bg); }
+.rex-lay  { background: var(--lay-bg); }
 
 @media (max-width: 640px) {
   .rex-header, .rex-runner { grid-template-columns: 1fr 56px 56px; gap: 5px; }
   .rex-name { font-size: 13px; }
   .rex-cell { font-size: 12px; padding: 3px 4px; }
+}
+
+/* ===== Theme toggle button ===== */
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.10);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s ease, transform .15s ease;
+}
+.theme-toggle:hover { background: rgba(255,255,255,.22); transform: scale(1.08); }
+
+/* ===== Surface remaps that pick up dark mode ===== */
+.search-bar, #searchInput, input[type="text"] {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+#bookmakerFilter {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+.match-card table th { color: var(--ink-soft); }
+.match-card table td { color: var(--ink); }
+.sport-tag {
+  background: var(--navy-700);
+  color: #fff;
 }

@@ -14,7 +14,31 @@
 <meta name="description" content="SportsOdds compares odds from major Australian bookmakers for Cricket, AFL, NRL, Tennis and UFC. Find the best prices and stay updated.">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Kanit:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet"/>
-<link href="style.css?v=exch-2" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="style.css?v=design-1" rel="stylesheet"/>
+<script>
+  // Apply saved theme before paint to avoid a flash of the wrong theme.
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+  })();
+  function toggleTheme() {
+    var root = document.documentElement;
+    var dark = root.getAttribute('data-theme') === 'dark';
+    if (dark) { root.removeAttribute('data-theme'); }
+    else { root.setAttribute('data-theme', 'dark'); }
+    try { localStorage.setItem('theme', dark ? 'light' : 'dark'); } catch (e) {}
+    var btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = dark ? '🌙' : '☀️';
+  }
+  // Set correct icon once DOM is ready.
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -23,6 +47,7 @@
 <div class="hamburger-wrapper">
 <button class="hamburger">☰</button>
 </div>
+<button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
 <h1 class="brand-logo">
   <span class="brand-odds">Sports</span><span class="brand-junction">Odds</span>
 </h1>
@@ -108,6 +133,6 @@
     <p>Contact: <a href="mailto:taxayp1@gmail.com">taxayp1@gmail.com</a></p>
   </details>
 </section>
-<script src="script.js?v=exch-2"></script>
+<script src="script.js?v=design-1"></script>
 </body>
 </html>
