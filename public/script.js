@@ -155,6 +155,30 @@ Object.assign(timeDisplay.style, {
 });
 header.appendChild(timeDisplay);
 
+// Map the-odds-api sport keys -> clean display labels for the card tag.
+// e.g. cricket_international_t20 -> "T20 International"
+const SPORT_LABELS = {
+  cricket_international_t20: 'T20 International',
+  cricket_test_match:        'Test Match',
+  cricket_odi:               'ODI',
+  cricket_big_bash:          'Big Bash',
+  cricket_ipl:               'IPL',
+  aussierules_afl:           'AFL',
+  rugbyleague_nrl:           'NRL',
+  rugby_league_nrl:          'NRL',
+  mma_mixed_martial_arts:    'UFC / MMA',
+  tennis_atp_wimbledon:      'Wimbledon (ATP)',
+  tennis_wta_wimbledon:      'Wimbledon (WTA)'
+};
+
+function sportTagLabel(key) {
+  if (!key) return 'Unknown';
+  const k = String(key).toLowerCase();
+  if (SPORT_LABELS[k]) return SPORT_LABELS[k];
+  // Fallback: tidy up any unmapped key (tennis_atp_us_open -> "Tennis Atp Us Open")
+  return k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 async function loadSport(sportKey) {
   // ensure bookmaker filter is visible on normal sports
   setBookmakerFilterVisible(true);
@@ -573,7 +597,7 @@ async function renderOdds(matches) {
         ${liveIndicator}
         <h3>${teams}</h3>
         <div class="start-time ${statusClass}">${timeDisplay}</div>
-        <div class="sport-tag">${match.sport || 'Unknown'}</div>
+        <div class="sport-tag">${sportTagLabel(match.sport)}</div>
         <div class="mc-colhead ${drawPresent ? 'has-draw' : ''}">
           <span class="mc-colhead-logo"></span>
           <span>Home</span>

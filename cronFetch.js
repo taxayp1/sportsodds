@@ -9,6 +9,7 @@ const SPORTS = [
   'rugbyleague_nrl',
   'cricket_international_t20',
   'cricket_test_match',
+  'cricket_odi',
   'tennis_atp_wimbledon',
   'tennis_wta_wimbledon',
   'mma_mixed_martial_arts'
