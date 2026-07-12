@@ -384,15 +384,9 @@ function validateOdds(homePrice, awayPrice, bookmaker, teams) {
 
 // ENHANCED: renderOdds with smooth animations
 async function renderOdds(matches) {
-  // Clear container with smooth transition
-  const existingCards = container.querySelectorAll('.match-card');
-  existingCards.forEach((card, index) => {
-    card.style.animationDelay = `${index * 0.05}s`;
-    card.style.animation = 'cardSlideOut 0.3s ease-in forwards';
-  });
-  
-  // Small delay to allow exit animation
-  setTimeout(() => {
+  // Render in one pass (like the racing tab) - no fade-out + setTimeout gap,
+  // which was causing a visible flicker/blank flash on tab switches.
+  {
     container.innerHTML = '';
     
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -588,10 +582,7 @@ async function renderOdds(matches) {
       }
       
       const card = document.createElement('div');
-      card.className = `match-card ${statusClass} card-entrance`;
-      card.style.animationDelay = `${matchIndex * 0.1}s`;
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(30px) scale(0.95)';
+      card.className = `match-card ${statusClass}`;
       
       card.innerHTML = `
         ${liveIndicator}
@@ -608,18 +599,11 @@ async function renderOdds(matches) {
       `;
 
       container.appendChild(card);
-      
-      // Trigger entrance animation
-      requestAnimationFrame(() => {
-        card.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0) scale(1)';
-      });
     });
 
     const hasDrawColumn = document.querySelector('th:nth-child(4)')?.textContent.toLowerCase() === 'draw';
     document.body.classList.toggle('draw-match', hasDrawColumn);
-  }, existingCards.length > 0 ? 200 : 0);
+  }
 }
 
 // Complete bet link generation for ALL AU bookmakers
@@ -679,14 +663,8 @@ function renderExchange(list) {
   const dropdown = document.getElementById('bookmakerFilter');
   if (dropdown) dropdown.style.display = 'none';
 
-  // Clear with smooth transition
-  const existingCards = container.querySelectorAll('.match-card');
-  existingCards.forEach((card, index) => {
-    card.style.animationDelay = `${index * 0.05}s`;
-    card.style.animation = 'cardSlideOut 0.3s ease-in forwards';
-  });
-
-  setTimeout(() => {
+  // Render in one pass (no fade-out + setTimeout gap = no flicker)
+  {
     container.innerHTML = '';
     
     if (!Array.isArray(list) || list.length === 0) {
@@ -741,10 +719,7 @@ function renderExchange(list) {
         timeDisplay = `Start: ${startTime.toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' })}`;
       }
 
-      card.className = `match-card ${statusClass} card-entrance`;
-      card.style.animationDelay = `${index * 0.1}s`;
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(30px) scale(0.95)';
+      card.className = `match-card ${statusClass}`;
       
       const timeText = timeDisplay;
       // Prefer the competition/tournament name (e.g. "Wimbledon", "ICC T20 WC",
@@ -789,15 +764,8 @@ function renderExchange(list) {
       `;
       
       container.appendChild(card);
-      
-      // Trigger entrance animation
-      requestAnimationFrame(() => {
-        card.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0) scale(1)';
-      });
     });
-  }, existingCards.length > 0 ? 200 : 0);
+  }
 }
 
 // ===== Racing Exchange (multi-runner Betfair win markets) =====
