@@ -582,7 +582,7 @@ async function renderOdds(matches) {
       }
       
       const card = document.createElement('div');
-      card.className = `match-card ${statusClass}`;
+      card.className = `match-card ${statusClass} card-entrance`;
       
       card.innerHTML = `
         ${liveIndicator}
@@ -719,7 +719,7 @@ function renderExchange(list) {
         timeDisplay = `Start: ${startTime.toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' })}`;
       }
 
-      card.className = `match-card ${statusClass}`;
+      card.className = `match-card ${statusClass} card-entrance`;
       
       const timeText = timeDisplay;
       // Prefer the competition/tournament name (e.g. "Wimbledon", "ICC T20 WC",
