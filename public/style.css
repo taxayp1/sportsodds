@@ -434,7 +434,7 @@ td canvas.sparkline {
 
 /* T&C Section Style */
 .terms-section {
-  background: linear-gradient(180deg, #0a4a85 0%, #003366 55%, #01243f 100%);
+  background: transparent;
   color: white;
   text-align: center;
   padding: 25px 20px;
@@ -648,7 +648,7 @@ td canvas.sparkline {
 
   .terms-section {
     font-size: 0.9rem;
-    background: linear-gradient(180deg, #0a4a85 0%, #003366 55%, #01243f 100%);
+    background: transparent;
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     border-radius: 0;
@@ -837,7 +837,7 @@ th, td { overflow: hidden; text-overflow: ellipsis; }
 .ex-matched strong { color: var(--ink); }
 /* Always-visible responsible gambling banner */
 .rg-banner{
-  background: linear-gradient(180deg, #0a4a85 0%, #003366 55%, #01243f 100%);
+  background: transparent;
   color:#fff;
   text-align:center;
   padding:14px 12px;
@@ -1376,4 +1376,18 @@ html {
   .exc-grid { gap: 8px; }
   .exc-side { padding: 8px; }
   .exc-price { font-size: 14px; }
+}
+
+
+/* ===== Footer: ONE element paints the background =====
+   Both the gambling-warning bar and the disclaimer bar live inside
+   .site-footer. Only this wrapper has a background, so the two bars
+   physically cannot show different colors or a seam. ===== */
+.site-footer {
+  background: linear-gradient(180deg, #0a4a85 0%, #003366 55%, #01243f 100%);
+}
+.site-footer .rg-banner,
+.site-footer .terms-section {
+  background: transparent !important;
+  background-color: transparent !important;
 }
