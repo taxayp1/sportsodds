@@ -211,6 +211,7 @@ async function cleanupOldRacing() {
 // row per runner. Set-based (a single INSERT..SELECT), so it's one round-trip
 // regardless of how many thousands of runners are on the board.
 async function snapshotRacingHistory() {
+  await schemaReady;
   const res = await pool.query(`
     INSERT INTO racing_history (runner_id, avg_price, book_count, fetched_at)
     SELECT
@@ -234,6 +235,7 @@ async function snapshotRacingHistory() {
 // Capped to the last `points` samples per runner (default 24 = ~2h at 5-min
 // fetches) - a sparkline doesn't need more, and it keeps the payload small.
 async function getRacingHistory(points = 24) {
+  await schemaReady;
   const { rows } = await pool.query(
     `
     SELECT runner_id, avg_price, fetched_at
@@ -263,6 +265,7 @@ async function getRacingHistory(points = 24) {
 // Drop history for races that have finished / gone stale. Keeps the table from
 // growing without bound (racing_board self-prunes; history must too).
 async function cleanupRacingHistory() {
+  await schemaReady;
   const res = await pool.query(`
     DELETE FROM racing_history
     WHERE fetched_at < NOW() - INTERVAL '12 hours'

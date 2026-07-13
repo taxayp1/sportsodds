@@ -561,12 +561,20 @@ app.get('/odds-db/racing', async (req, res) => {
   try {
     const codeRaw = (req.query.code || '').trim().toUpperCase();
     const code = ['T', 'H', 'G'].includes(codeRaw) ? codeRaw : null;
-    // Fetch board + history together so the client makes one request.
-    const [races, dataAsOf, history] = await Promise.all([
+    const [races, dataAsOf] = await Promise.all([
       dbRacing.getBoard(code, 6),
-      dbRacing.getLastFetchedAt(),
-      dbRacing.getRacingHistory(24)   // last ~2h of 5-min samples
+      dbRacing.getLastFetchedAt()
     ]);
+
+    // History is a nice-to-have (sparklines) - never let it break the board.
+    let history = {};
+    try {
+      history = await dbRacing.getRacingHistory(24);
+      console.log(`📈 Racing history: serving ${Object.keys(history).length} runner series`);
+    } catch (e) {
+      console.warn('⚠️  Racing history unavailable:', e.message);
+    }
+
     res.json({ dataAsOf, code: code || 'all', count: races.length, races, history });
   } catch (err) {
     console.error('❌ RACING error:', err.message);

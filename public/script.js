@@ -1139,7 +1139,9 @@ function removeExchangeFilterBar() {
 let racingHistory = {};   // runner_id -> [{t, p}, ...]
 
 function runnerSparkline(runnerId) {
-  const series = racingHistory[runnerId];
+  // Object keys are always strings; runner_id may come back as a number from
+  // the board. Coerce so the lookup can't silently miss on a type mismatch.
+  const series = racingHistory[String(runnerId)];
   if (!Array.isArray(series) || series.length < 2) {
     return '<span class="spark-empty" title="Not enough history yet">–</span>';
   }
