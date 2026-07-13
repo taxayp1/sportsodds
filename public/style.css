@@ -70,7 +70,6 @@ body {
   background: var(--bg);
   color: var(--ink);
   scroll-behavior: smooth;
-  transition: background .25s ease, color .25s ease;
 }
 .mobile-scroll-wrapper { background: var(--bg); }
 
@@ -988,9 +987,12 @@ body {
   transform: translate3d(0, 0, 0);
 }
 
-/* Smooth transitions for interactive elements */
+/* Smooth transitions for interactive elements.
+   NOTE: deliberately NOT 'transition: all' - that forced the browser to animate
+   every property on every card when CSS variables changed (theme toggle), which
+   froze the tab on data-heavy pages like Racing. */
 .sport-tab, .bet-btn, .hamburger, .match-card {
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   transform: translate3d(0, 0, 0);
 }
 
@@ -1428,4 +1430,17 @@ html {
   .spark-svg { width: 40px; height: 14px; }
   .spark { font-size: 10px; gap: 3px; }
   .racing-runner-meta { gap: 6px; }
+}
+
+
+/* ===== Theme-switch performance guard =====
+   Applied to <html> for one frame while the theme flips. Disabling every
+   transition/animation makes the switch instant instead of asking the browser
+   to animate thousands of elements at once (which locked up the tab). */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
 }

@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Kanit:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="style.css?v=spark-2" rel="stylesheet"/>
+<link href="style.css?v=spark-3" rel="stylesheet"/>
 <script>
   // Apply saved theme before paint to avoid a flash of the wrong theme.
   (function () {
@@ -27,11 +27,25 @@
   function toggleTheme() {
     var root = document.documentElement;
     var dark = root.getAttribute('data-theme') === 'dark';
+
+    // Kill all transitions/animations for the duration of the switch. Without
+    // this the browser tries to animate every element at once when the CSS
+    // variables change, which locks up the tab on data-heavy pages (Racing).
+    root.classList.add('theme-switching');
+
     if (dark) { root.removeAttribute('data-theme'); }
     else { root.setAttribute('data-theme', 'dark'); }
     try { localStorage.setItem('theme', dark ? 'light' : 'dark'); } catch (e) {}
+
     var btn = document.getElementById('themeToggle');
     if (btn) btn.textContent = dark ? '🌙' : '☀️';
+
+    // Re-enable transitions once the repaint has committed.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        root.classList.remove('theme-switching');
+      });
+    });
   }
   // Set correct icon once DOM is ready.
   document.addEventListener('DOMContentLoaded', function () {
@@ -135,6 +149,6 @@
   </details>
 </section>
 </footer>
-<script src="script.js?v=spark-2"></script>
+<script src="script.js?v=spark-3"></script>
 </body>
 </html>
