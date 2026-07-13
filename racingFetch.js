@@ -147,8 +147,17 @@ async function runAll() {
   console.log(`💾 AU runners w/ your bookies: ${cRunners} (T:${counts.T} H:${counts.H} G:${counts.G}), ${cOdds} odds rows`);
   console.log(`   (skipped ${skippedIntl} international meetings)`);
 
+  // Append this cycle's average-price-per-runner to the history table.
+  // Must run AFTER all upserts (so the board is current) and BEFORE cleanup
+  // (so runners about to be pruned still get their final data point).
+  try { await dbr.snapshotRacingHistory(); }
+  catch (err) { console.warn('⚠️  Racing history snapshot failed:', err.message); }
+
   try { await dbr.cleanupOldRacing(); }
   catch (err) { console.warn('⚠️  Racing cleanup failed:', err.message); }
+
+  try { await dbr.cleanupRacingHistory(); }
+  catch (err) { console.warn('⚠️  Racing history cleanup failed:', err.message); }
 
   console.log(`\n✅ Racing fetch completed: ${cOdds} odds rows at ${new Date().toISOString()}`);
 }

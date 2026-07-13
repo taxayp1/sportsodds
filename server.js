@@ -561,11 +561,13 @@ app.get('/odds-db/racing', async (req, res) => {
   try {
     const codeRaw = (req.query.code || '').trim().toUpperCase();
     const code = ['T', 'H', 'G'].includes(codeRaw) ? codeRaw : null;
-    const [races, dataAsOf] = await Promise.all([
+    // Fetch board + history together so the client makes one request.
+    const [races, dataAsOf, history] = await Promise.all([
       dbRacing.getBoard(code, 6),
-      dbRacing.getLastFetchedAt()
+      dbRacing.getLastFetchedAt(),
+      dbRacing.getRacingHistory(24)   // last ~2h of 5-min samples
     ]);
-    res.json({ dataAsOf, code: code || 'all', count: races.length, races });
+    res.json({ dataAsOf, code: code || 'all', count: races.length, races, history });
   } catch (err) {
     console.error('❌ RACING error:', err.message);
     res.status(500).json({ error: 'Failed to load racing board' });

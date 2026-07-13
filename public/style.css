@@ -1391,3 +1391,41 @@ html {
   background: transparent !important;
   background-color: transparent !important;
 }
+
+/* ===== Racing sparkline (avg price across AU bookies over time) =====
+   Direction convention: falling price = FIRMING (green), rising = DRIFTING (red). */
+.racing-runner-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.spark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.spark-svg {
+  width: 52px;
+  height: 16px;
+  overflow: visible;
+}
+.spark-trend { font-variant-numeric: tabular-nums; }
+
+.spark.firm  { color: var(--best); }   /* price shortened - backed in */
+.spark.drift { color: var(--live); }   /* price lengthened - drifting */
+.spark.flat  { color: var(--ink-soft); }
+
+.spark-empty {
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: .6;
+}
+
+@media (max-width: 640px) {
+  .spark-svg { width: 40px; height: 14px; }
+  .spark { font-size: 10px; gap: 3px; }
+  .racing-runner-meta { gap: 6px; }
+}

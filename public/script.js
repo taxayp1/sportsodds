@@ -1131,8 +1131,60 @@ function removeExchangeFilterBar() {
   if (bar) bar.remove();
 }
 
+// ---- Racing sparkline ------------------------------------------------------
+// Builds a tiny inline SVG from the runner's average-price series, plus a
+// firm/drift indicator. NOTE the direction convention: in racing, a FALLING
+// price means the runner is FIRMING (money coming for it) and a RISING price
+// means it's DRIFTING (money going away). So down = green, up = red.
+let racingHistory = {};   // runner_id -> [{t, p}, ...]
+
+function runnerSparkline(runnerId) {
+  const series = racingHistory[runnerId];
+  if (!Array.isArray(series) || series.length < 2) {
+    return '<span class="spark-empty" title="Not enough history yet">–</span>';
+  }
+
+  const pts = series.map(d => Number(d.p)).filter(n => isFinite(n) && n > 0);
+  if (pts.length < 2) return '<span class="spark-empty">–</span>';
+
+  const first = pts[0];
+  const last  = pts[pts.length - 1];
+  const min   = Math.min(...pts);
+  const max   = Math.max(...pts);
+  const range = (max - min) || 1;          // avoid divide-by-zero on a flat line
+
+  // Map the series into a 60x18 viewBox.
+  const W = 60, H = 18, PAD = 2;
+  const coords = pts.map((p, i) => {
+    const x = PAD + (i / (pts.length - 1)) * (W - PAD * 2);
+    // invert y: higher price = higher on chart
+    const y = (H - PAD) - ((p - min) / range) * (H - PAD * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  // Trend: falling price = firming (green), rising = drifting (red).
+  const pct = ((last - first) / first) * 100;
+  let cls, arrow;
+  if (Math.abs(pct) < 0.5) { cls = 'flat';  arrow = '–'; }
+  else if (pct < 0)        { cls = 'firm';  arrow = '▼'; }   // shortened = firming
+  else                     { cls = 'drift'; arrow = '▲'; }   // lengthened = drifting
+
+  const title = `${first.toFixed(2)} → ${last.toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%) · avg across bookies`;
+
+  return `
+    <span class="spark ${cls}" title="${title}">
+      <svg viewBox="0 0 ${W} ${H}" class="spark-svg" preserveAspectRatio="none">
+        <polyline points="${coords}" fill="none" stroke="currentColor" stroke-width="1.5"
+                  stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <span class="spark-trend">${arrow} ${Math.abs(pct).toFixed(1)}%</span>
+    </span>`;
+}
+
 function renderRacing(payload) {
   const races0 = (payload && Array.isArray(payload.races)) ? payload.races : [];
+  // Stash the odds-history series so runnerSparkline() can look up by runner_id.
+  racingHistory = (payload && payload.history) ? payload.history : {};
 
   // pills OUTSIDE the grid, in their own full-width bar
   const bar = ensureRacingFilterBar();
@@ -1188,7 +1240,10 @@ function renderRacing(payload) {
         <div class="racing-runner">
           <div class="racing-runner-head">
             <span class="racing-runner-name">${rn.runner_number}. ${rn.runner_name}</span>
-            <span class="racing-best">best ${(+rn.best_odds).toFixed(2)}</span>
+            <span class="racing-runner-meta">
+              ${runnerSparkline(rn.runner_id)}
+              <span class="racing-best">best ${(+rn.best_odds).toFixed(2)}</span>
+            </span>
           </div>
           <div class="racing-odds-row">${cells}</div>
         </div>`;

@@ -62,6 +62,26 @@ async function ensureSchema() {
   `);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_rboard_race  ON racing_board(race_key)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_rboard_code  ON racing_board(racing_code)`);
+
+  // ---- Odds history (for sparklines) --------------------------------------
+  // APPEND-ONLY time series. One row per (runner, fetch) holding the AVERAGE
+  // price across all AU bookies we carry at that moment. Average (not best) is
+  // used deliberately: best-price is noisy - a single bookie moving swings it -
+  // whereas the mean reflects genuine market movement (firming vs drifting).
+  // racing_board is UPSERT-only so it holds no history; this table is the
+  // source of truth for the sparkline.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS racing_history (
+      runner_id   TEXT NOT NULL,
+      avg_price   REAL NOT NULL,          -- mean decimal odds across AU bookies
+      book_count  INTEGER,                -- how many bookies contributed
+      fetched_at  TIMESTAMPTZ NOT NULL,
+      PRIMARY KEY (runner_id, fetched_at)
+    )
+  `);
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS idx_rhist_runner ON racing_history(runner_id, fetched_at DESC)`
+  );
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_rboard_start ON racing_board(start_time)`);
 }
 
@@ -184,4 +204,79 @@ async function cleanupOldRacing() {
   }
 }
 
-module.exports = { upsertBoardOdds, getBoard, getLastFetchedAt, cleanupOldRacing };
+// ---- Odds history (sparklines) ---------------------------------------------
+
+// Called once at the END of each fetch cycle. Computes the average price per
+// runner across all AU bookies currently on the board and appends one history
+// row per runner. Set-based (a single INSERT..SELECT), so it's one round-trip
+// regardless of how many thousands of runners are on the board.
+async function snapshotRacingHistory() {
+  const res = await pool.query(`
+    INSERT INTO racing_history (runner_id, avg_price, book_count, fetched_at)
+    SELECT
+      runner_id,
+      AVG(price)::real     AS avg_price,
+      COUNT(*)             AS book_count,
+      NOW()                AS fetched_at
+    FROM racing_board
+    WHERE price IS NOT NULL
+      AND price > 1.0
+    GROUP BY runner_id
+    HAVING COUNT(*) > 0
+    ON CONFLICT (runner_id, fetched_at) DO NOTHING
+  `);
+  console.log(`📈 Racing history: snapshotted ${res.rowCount} runner averages`);
+  return res.rowCount;
+}
+
+// Returns the recent series per runner for the sparkline, as:
+//   { runner_id: [{ t: <iso>, p: <avgPrice> }, ...oldest→newest] }
+// Capped to the last `points` samples per runner (default 24 = ~2h at 5-min
+// fetches) - a sparkline doesn't need more, and it keeps the payload small.
+async function getRacingHistory(points = 24) {
+  const { rows } = await pool.query(
+    `
+    SELECT runner_id, avg_price, fetched_at
+    FROM (
+      SELECT
+        runner_id,
+        avg_price,
+        fetched_at,
+        ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY fetched_at DESC) AS rn
+      FROM racing_history
+      WHERE fetched_at > NOW() - INTERVAL '6 hours'
+    ) t
+    WHERE rn <= $1
+    ORDER BY runner_id, fetched_at ASC
+    `,
+    [points]
+  );
+
+  const out = {};
+  for (const r of rows) {
+    if (!out[r.runner_id]) out[r.runner_id] = [];
+    out[r.runner_id].push({ t: r.fetched_at, p: Number(r.avg_price) });
+  }
+  return out;
+}
+
+// Drop history for races that have finished / gone stale. Keeps the table from
+// growing without bound (racing_board self-prunes; history must too).
+async function cleanupRacingHistory() {
+  const res = await pool.query(`
+    DELETE FROM racing_history
+    WHERE fetched_at < NOW() - INTERVAL '12 hours'
+  `);
+  if (res.rowCount) console.log(`🧹 Racing history: pruned ${res.rowCount} old rows`);
+  return res.rowCount;
+}
+
+module.exports = {
+  upsertBoardOdds,
+  getBoard,
+  getLastFetchedAt,
+  cleanupOldRacing,
+  snapshotRacingHistory,
+  getRacingHistory,
+  cleanupRacingHistory
+};
